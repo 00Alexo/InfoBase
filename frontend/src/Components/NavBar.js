@@ -7,9 +7,9 @@ import {
   NavbarMenuToggle,
   NavbarMenu,
   NavbarMenuItem,
-  Link,
   Button,
 } from "@heroui/react";
+import { Link } from 'react-router-dom';
 
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -28,57 +28,73 @@ export default function App() {
   ];
 
   return (
-    <Navbar onMenuOpenChange={setIsMenuOpen} maxWidth="full">
+    <Navbar 
+      onMenuOpenChange={setIsMenuOpen} 
+      maxWidth="full"
+      className="bg-gray-900/95 backdrop-blur-lg border-b border-red-500/20"
+      classNames={{
+        wrapper: "px-6",
+        item: "text-gray-300 hover:text-red-400 transition-colors duration-200",
+        brand: "text-white font-bold text-xl",
+      }}
+    >
       <NavbarContent>
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-          className="sm:hidden"
+          className="sm:hidden text-red-400"
         />
         <NavbarBrand>
-          <p className="font-bold text-inherit">InfoBase</p>
+          <Link className="font-bold text-transparent bg-gradient-to-r from-red-400 to-red-600 bg-clip-text cursor-pointer text-2xl" to="/">
+            InfoBase
+          </Link>
         </NavbarBrand>
       </NavbarContent>
 
-      <NavbarContent className="hidden sm:flex gap-4" justify="center">
+      <NavbarContent className="hidden sm:flex gap-8" justify="center">
         <NavbarItem>
-          <Link color="foreground" href="#">
+          <p className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium">
             Features
-          </Link>
-        </NavbarItem>
-        <NavbarItem isActive>
-          <Link aria-current="page" href="#">
-            Customers
-          </Link>
+          </p>
         </NavbarItem>
         <NavbarItem>
-          <Link color="foreground" href="#">
+          <p className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium">
+            Features
+          </p>
+        </NavbarItem>
+        <NavbarItem>
+          <p className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium">
             Integrations
-          </Link>
+          </p>
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">
         <NavbarItem className="hidden lg:flex">
-          <Link href="#">Login</Link>
+          <p className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium">Login</p>
         </NavbarItem>
         <NavbarItem>
-          <Button as={Link} color="primary" href="#" variant="flat">
+          <Button 
+            color="primary" 
+            variant="solid"
+            className="bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold px-6 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg"
+          >
             Sign Up
           </Button>
         </NavbarItem>
       </NavbarContent>
-      <NavbarMenu>
+      <NavbarMenu className="bg-gray-900/98 backdrop-blur-lg border-r border-red-500/20">
         {menuItems.map((item, index) => (
           <NavbarMenuItem key={`${item}-${index}`}>
-            <Link
-              className="w-full"
-              color={
-                index === 2 ? "primary" : index === menuItems.length - 1 ? "danger" : "foreground"
-              }
-              href="#"
-              size="lg"
+            <p
+              className={`w-full text-lg font-medium cursor-pointer transition-colors duration-200 ${
+                index === 2 
+                  ? "text-red-400" 
+                  : index === menuItems.length - 1 
+                    ? "text-red-300 hover:text-red-400" 
+                    : "text-gray-300 hover:text-red-400"
+              }`}
             >
               {item}
-            </Link>
+            </p>
           </NavbarMenuItem>
         ))}
       </NavbarMenu>
