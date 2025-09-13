@@ -11,7 +11,7 @@ import {
 } from "@heroui/react";
 import { Link } from 'react-router-dom';
 
-export default function NavBar() {
+const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   const menuItems = [
@@ -63,7 +63,7 @@ export default function NavBar() {
         </NavbarItem>
         <NavbarItem>
           <p className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium">
-            Leaderboards
+            Contests
           </p>
         </NavbarItem>
       </NavbarContent>
@@ -102,3 +102,4 @@ export default function NavBar() {
   );
 }
 
+export default NavBar;
