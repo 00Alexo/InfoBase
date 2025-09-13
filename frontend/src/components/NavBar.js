@@ -8,6 +8,10 @@ import {
   NavbarMenu,
   NavbarMenuItem,
   Button,
+  DropdownItem,
+  DropdownTrigger,
+  Dropdown,
+  DropdownMenu,
 } from "@heroui/react";
 import { Link } from 'react-router-dom';
 
