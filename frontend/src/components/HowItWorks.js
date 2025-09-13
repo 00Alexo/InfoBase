@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaUserPlus, FaCode, FaTrophy } from 'react-icons/fa';
+import { FaUserPlus, FaCode, FaTrophy, FaBullseye, FaFistRaised, FaMedal } from 'react-icons/fa';
 
 const HowItWorks = ({ fadeIn, iconVariants }) => {
   return (
@@ -44,8 +44,8 @@ const HowItWorks = ({ fadeIn, iconVariants }) => {
             variants={fadeIn}
           >
             <div className="md:w-1/2 md:pr-16 text-right">
-              <h3 className="text-red-500 text-4xl font-bold mb-6 bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent">Sign Up & Start</h3>
-              <p className="text-gray-300 text-xl leading-relaxed">Create your account and dive into our extensive library of coding challenges tailored to your skill level.</p>
+              <h3 className="text-red-500 text-4xl font-bold mb-6 bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent">Join & Begin</h3>
+              <p className="text-gray-300 text-xl leading-relaxed">Create your account, complete the skill assessment, and get matched with coding challenges that fit your level perfectly.</p>
             </div>
             <motion.div 
               className="rounded-full bg-gradient-to-br from-red-500 to-red-700 text-white h-20 w-20 flex items-center justify-center font-bold text-3xl my-6 md:my-0 z-10 shadow-2xl border-4 border-red-400/30"
@@ -56,10 +56,10 @@ const HowItWorks = ({ fadeIn, iconVariants }) => {
             </motion.div>
             <div className="md:w-1/2 md:pl-16">
               <div className="bg-gray-800 p-6 rounded-xl shadow-lg border border-red-600/20">
-                <span className="text-4xl mb-4 block">�</span>
-                <p className="text-gray-300">Upload files, connect databases, or integrate with your existing tools seamlessly.</p>
+                <FaBullseye className="text-4xl mb-4 block text-red-400" />
+                <p className="text-gray-300">Take our smart assessment to identify your strengths and get personalized problem recommendations.</p>
               </div>
-            </div>
+            </div> 
           </motion.div>
 
           {/* Step 2 */}
@@ -71,8 +71,8 @@ const HowItWorks = ({ fadeIn, iconVariants }) => {
             variants={fadeIn}
           >
             <div className="md:w-1/2 md:pl-16 text-left">
-              <h3 className="text-red-400 text-4xl font-bold mb-6 bg-gradient-to-r from-red-300 to-red-500 bg-clip-text text-transparent">Practice & Compete</h3>
-              <p className="text-gray-300 text-xl leading-relaxed">Solve problems, participate in contests, and challenge others in real-time 1v1 coding battles.</p>
+              <h3 className="text-red-400 text-4xl font-bold mb-6 bg-gradient-to-r from-red-300 to-red-500 bg-clip-text text-transparent">Practice & Battle</h3>
+              <p className="text-gray-300 text-xl leading-relaxed">Solve algorithmic challenges, participate in daily contests, and engage in intense 1v1 coding duels with real-time feedback.</p>
             </div>
             <motion.div 
               className="rounded-full bg-gradient-to-br from-red-400 to-red-600 text-white h-20 w-20 flex items-center justify-center font-bold text-3xl my-6 md:my-0 z-10 shadow-2xl border-4 border-red-300/30"
@@ -83,8 +83,8 @@ const HowItWorks = ({ fadeIn, iconVariants }) => {
             </motion.div>
             <div className="md:w-1/2 md:pr-16">
               <div className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 p-8 rounded-2xl shadow-2xl border border-red-400/20 backdrop-blur-lg hover:border-red-300/40 transition-all duration-300">
-                <span className="text-5xl mb-6 block filter drop-shadow-lg">📈</span>
-                <p className="text-gray-300 text-lg leading-relaxed">Build interactive charts, set up filters, and create custom views to analyze your data with advanced visualization capabilities.</p>
+                <FaFistRaised className="text-5xl mb-6 block filter drop-shadow-lg text-red-400" />
+                <p className="text-gray-300 text-lg leading-relaxed">Challenge opponents in real-time coding battles, track your performance analytics, and watch your skills improve with AI-powered insights.</p>
               </div>
             </div>
           </motion.div>
@@ -98,20 +98,20 @@ const HowItWorks = ({ fadeIn, iconVariants }) => {
             variants={fadeIn}
           >
             <div className="md:w-1/2 md:pr-16 text-right">
-              <h3 className="text-red-300 text-4xl font-bold mb-6 bg-gradient-to-r from-red-200 to-red-400 bg-clip-text text-transparent">Share & Collaborate</h3>
-              <p className="text-gray-300 text-xl leading-relaxed">Share insights with your team and collaborate on data-driven decisions in real-time with powerful collaboration features.</p>
+              <h3 className="text-red-300 text-4xl font-bold mb-6 bg-gradient-to-r from-red-200 to-red-400 bg-clip-text text-transparent">Climb & Win</h3>
+              <p className="text-gray-300 text-xl leading-relaxed">Rise through the global leaderboards, earn achievements, and compete for prizes while building your competitive programming reputation.</p>
             </div>
             <motion.div 
               className="rounded-full bg-gradient-to-br from-red-300 to-red-500 text-white h-20 w-20 flex items-center justify-center font-bold text-3xl my-6 md:my-0 z-10 shadow-2xl border-4 border-red-200/30"
               variants={iconVariants}
               whileHover={{ scale: 1.1, rotate: 5 }}
             >
-              3
+              <FaTrophy className="text-2xl" />
             </motion.div>
             <div className="md:w-1/2 md:pl-16">
               <div className="bg-gradient-to-br from-gray-800/90 to-gray-900/90 p-8 rounded-2xl shadow-2xl border border-red-300/20 backdrop-blur-lg hover:border-red-200/40 transition-all duration-300">
-                <span className="text-5xl mb-6 block filter drop-shadow-lg">🤝</span>
-                <p className="text-gray-300 text-lg leading-relaxed">Export reports, schedule updates, and collaborate seamlessly across your organization with enterprise-grade sharing tools.</p>
+                <FaMedal className="text-5xl mb-6 block filter drop-shadow-lg text-red-300" />
+                <p className="text-gray-300 text-lg leading-relaxed">Showcase your achievements, compete for monthly prizes, and join the elite community of top competitive programmers worldwide.</p>
               </div>
             </div>
           </motion.div>

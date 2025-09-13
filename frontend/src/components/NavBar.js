@@ -56,9 +56,57 @@ const NavBar = () => {
 
       <NavbarContent className="hidden sm:flex gap-8" justify="center">
         <NavbarItem>
-          <p className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium">
-            Problems
-          </p>
+          <Dropdown>
+          <NavbarItem>
+            <DropdownTrigger>
+              <p
+                disableRipple
+                className="bg-transparent data-[hover=true]:bg-transparent
+                text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium"
+                radius="sm"
+                variant="light"
+              >
+                Problems
+              </p>
+            </DropdownTrigger>
+          </NavbarItem>
+          <DropdownMenu
+            itemClasses={{
+              base: "gap-4",
+            }}
+          >
+            <DropdownItem
+              key="autoscaling"
+              description="ACME scales apps based on demand and load"
+            >
+              Autoscaling
+            </DropdownItem>
+            <DropdownItem
+              key="usage_metrics"
+              description="Real-time metrics to debug issues"
+            >
+              Usage Metrics
+            </DropdownItem>
+            <DropdownItem
+              key="production_ready"
+              description="ACME runs on ACME, join us at web scale"
+            >
+              Production Ready
+            </DropdownItem>
+            <DropdownItem
+              key="99_uptime"
+              description="High availability and uptime guarantees"
+            >
+              +99% Uptime
+            </DropdownItem>
+            <DropdownItem
+              key="supreme_support"
+              description="Support team ready to respond"
+            >
+              +Supreme Support
+            </DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
         </NavbarItem>
         <NavbarItem>
           <p className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium">
@@ -73,16 +121,20 @@ const NavBar = () => {
       </NavbarContent>
       <NavbarContent justify="end">
         <NavbarItem className="hidden lg:flex">
-          <p className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium">Login</p>
+            <Link className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium" to="/signin">
+                Login
+            </Link>
         </NavbarItem>
         <NavbarItem>
-          <Button 
-            color="primary" 
-            variant="solid"
-            className="bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold px-6 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg"
-          >
-            Sign Up
-          </Button>
+            <Link to="/signup">
+                <Button 
+                    color="primary" 
+                    variant="solid"
+                    className="bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold px-6 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg"
+                >
+                    Sign Up
+                </Button>
+            </Link>
         </NavbarItem>
       </NavbarContent>
       <NavbarMenu className="bg-gray-900/98 backdrop-blur-lg border-r border-red-500/20">

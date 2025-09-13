@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { Parallax, ParallaxLayer } from '@react-spring/parallax';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaCode, FaTrophy, FaUsers, FaRobot, FaFistRaised, FaGift } from 'react-icons/fa';
+import { FaRobot, FaFistRaised, FaTrophy, FaChevronDown, FaArrowRight } from 'react-icons/fa';
 import Hero from '../components/Hero';
 import Features from '../components/Features';
 import HowItWorks from '../components/HowItWorks';
@@ -320,9 +320,7 @@ const WelcomePage = () => {
                         transition={{ duration: 1.5, repeat: Infinity }}
                         className="text-red-400"
                       >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                        </svg>
+                        <FaChevronDown className="w-6 h-6" />
                       </motion.div>
                       <span className="text-white/60 text-sm">Discover competitive features</span>
                     </motion.div>
@@ -453,9 +451,7 @@ const WelcomePage = () => {
           }}
         >
           Get Started
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-          </svg>
+          <FaArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>
     </div>

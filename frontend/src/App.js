@@ -4,6 +4,8 @@ import NavBar from './components/NavBar'
 import HomePage from './pages/HomePage';
 import NotFound from './pages/NotFound';
 import WelcomePage from './pages/WelcomePage';
+import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
 
 function App() {
   return (
@@ -14,6 +16,8 @@ function App() {
           <Route path = "/" element={<WelcomePage/>}/>
           <Route path = "/welcome" element={<WelcomePage/>}/>
           <Route path = "/home" element={<><NavBar/><HomePage/></>}/>
+          <Route path = "/signin" element={<><NavBar/><SignIn/></>}/>
+          <Route path = "/signup" element={<><NavBar/><SignUp/></>}/>
         </Routes>
       </div>
     </BrowserRouter>
