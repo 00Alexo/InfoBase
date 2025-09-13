@@ -53,17 +53,17 @@ export default function App() {
       <NavbarContent className="hidden sm:flex gap-8" justify="center">
         <NavbarItem>
           <p className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium">
-            Features
+            Problems
           </p>
         </NavbarItem>
         <NavbarItem>
           <p className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium">
-            Features
+            Compete
           </p>
         </NavbarItem>
         <NavbarItem>
           <p className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium">
-            Integrations
+            Leaderboards
           </p>
         </NavbarItem>
       </NavbarContent>

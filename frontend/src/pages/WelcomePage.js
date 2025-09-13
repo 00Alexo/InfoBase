@@ -9,8 +9,8 @@ import HowItWorks from '../components/HowItWorks';
 import Comparison from '../components/Comparison';
 import Background from '../components/Background';
 import Navigation from '../components/Navigation';
-import NavBar from '../components/NavBar';
 import Globe from '../components/Globe';
+import NavBar from '../components/NavBar'
 
 const WelcomePage = () => {
   const navigate = useNavigate();
