@@ -181,7 +181,6 @@ int countVowels(char text[]) {
 
     return (
         <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-bgCustomPage to-bgCustomLight flex-col items-center justify-center p-6 lg:p-12 relative overflow-hidden">
-            {/* Background Pattern */}
             <div className="absolute inset-0 opacity-15">
                 <div className="absolute top-[8%] lg:top-[10%] left-[5%] lg:left-[8%] text-5xl lg:text-6xl text-primaryCustom font-mono">{'{'}</div>
                 <div className="absolute top-[15%] lg:top-[18%] right-[8%] lg:right-[12%] text-4xl lg:text-4xl text-secondaryCustom font-mono">{'}'}</div>
@@ -200,8 +199,7 @@ int countVowels(char text[]) {
                         Join thousands of developers solving challenging problems and competing in real-time battles.
                     </p>
                 </div>
-                
-                {/* Scrollable Features */}
+
                 <div className="mb-6 lg:mb-8">
                     <div className="bg-bgCustomCard border border-borderCustom rounded-lg p-4 lg:p-6 hover:border-primaryCustom transition-all duration-500 min-h-[100px] lg:min-h-[120px] relative overflow-hidden">
                         <div 
@@ -222,7 +220,6 @@ int countVowels(char text[]) {
                             })}
                         </div>
                         
-                        {/* Dots indicator */}
                         <div className="flex justify-center gap-2 mt-4">
                             {features.map((_, index) => (
                                 <button
@@ -237,7 +234,6 @@ int countVowels(char text[]) {
                     </div>
                 </div>
                 
-                {/* Clickable Code Preview */}
                 <div className="bg-blackCustomMatte border border-borderCustom rounded-lg p-3 lg:p-4 text-left font-mono text-xs relative overflow-hidden h-[280px] lg:h-[340px]">
                     <div className="flex items-center gap-2 mb-2 lg:mb-3">
                         <div className="w-2 lg:w-3 h-2 lg:h-3 rounded-full bg-red-500"></div>
@@ -255,7 +251,6 @@ int countVowels(char text[]) {
                         )}
                     </div>
                     
-                    {/* Clickable Algorithm progress bar */}
                     <div className="absolute bottom-2 left-4 right-4">
                         <div className="flex gap-1">
                             {algorithms.map((_, index) => (

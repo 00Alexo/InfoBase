@@ -12,11 +12,15 @@ import {
   DropdownTrigger,
   Dropdown,
   DropdownMenu,
+  Avatar,
+  DropdownSection,
 } from "@heroui/react";
 import { Link } from 'react-router-dom';
+import { useAuthContext } from "../Hooks/useAuthContext";
 
 const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const { user } = useAuthContext();
 
   const menuItems = [
     "Profile",
@@ -119,24 +123,79 @@ const NavBar = () => {
           </p>
         </NavbarItem>
       </NavbarContent>
-      <NavbarContent justify="end">
-        <NavbarItem className="hidden lg:flex">
-            <Link className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium" to="/signin">
-                Login
-            </Link>
-        </NavbarItem>
-        <NavbarItem>
-            <Link to="/signup">
-                <Button 
-                    color="primary" 
-                    variant="solid"
-                    className="bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold px-6 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg"
-                >
-                    Sign Up
-                </Button>
-            </Link>
-        </NavbarItem>
-      </NavbarContent>
+      {user ?  (
+        <NavbarContent justify="end">
+          <NavbarItem className="hidden lg:flex">
+              <Dropdown>
+                <DropdownTrigger>
+                  <Avatar
+                      showFallback
+                      name = {user.username.charAt(0).toUpperCase()}
+                      as="button"
+                      size="md"
+                      className="transition-transform border-2 border-red-700 hover:border-red-500 rounded-full duration-300"
+                      src={""}
+                  />
+                </DropdownTrigger>
+                <DropdownMenu aria-label="Dropdown menu with description" variant="faded">
+                  <DropdownSection showDivider title="Actions">
+                    <DropdownItem
+                      key="new"
+                      description="Create a new file"
+                      shortcut="⌘N"
+                    >
+                      New file
+                    </DropdownItem>
+                    <DropdownItem
+                      key="copy"
+                      description="Copy the file link"
+                      shortcut="⌘C"
+                    >
+                      Copy link
+                    </DropdownItem>
+                    <DropdownItem
+                      key="edit"
+                      description="Allows you to edit the file"
+                      shortcut="⌘⇧E"
+                    >
+                      Edit file
+                    </DropdownItem>
+                  </DropdownSection>
+                  <DropdownSection title="Danger zone">
+                    <DropdownItem
+                      key="delete"
+                      className="text-danger"
+                      color="danger"
+                      description="Permanently delete the file"
+                      shortcut="⌘⇧D"
+                    >
+                      Delete file
+                    </DropdownItem>
+                  </DropdownSection>
+                </DropdownMenu>
+              </Dropdown>
+          </NavbarItem>
+        </NavbarContent>
+      ) : (
+        <NavbarContent justify="end">
+          <NavbarItem className="hidden lg:flex">
+              <Link className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium" to="/signin">
+                  Login
+              </Link>
+          </NavbarItem>
+          <NavbarItem>
+              <Link to="/signup">
+                  <Button 
+                      color="primary" 
+                      variant="solid"
+                      className="bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold px-6 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg"
+                  >
+                      Sign Up
+                  </Button>
+              </Link>
+          </NavbarItem>
+        </NavbarContent>
+      )}
       <NavbarMenu className="bg-gray-900/98 backdrop-blur-lg border-r border-red-500/20">
         {menuItems.map((item, index) => (
           <NavbarMenuItem key={`${item}-${index}`}>
