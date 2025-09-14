@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
+const userRoutes = require('./routes/userRoutes');
 
 const allowedOrigin = process.env.ALLOWED_ORIGIN;
 
@@ -24,6 +25,7 @@ app.use((req, res, next) =>{
     }
     next();
 })
+app.use('/api/user', userRoutes);
 
 mongoose.connect(process.env.mongoDB)
 .then(() => {

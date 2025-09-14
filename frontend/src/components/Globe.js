@@ -17,9 +17,9 @@ const Globe = () => {
                 minWidth: 200.00,
                 scale: 1.20,
                 scaleMobile: 1.00,
-                color: 0xef4444,  // red-500 to match our theme
-                color2: 0xdc2626, // red-600 for secondary color
-                backgroundColor: 0x18191c, // our dark background
+                color: 0xef4444,
+                color2: 0xB0B0B1,
+                backgroundColor: 0x18191c,
                 forceAnimate: true
             });
         }
