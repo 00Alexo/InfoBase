@@ -17,10 +17,14 @@ import {
 } from "@heroui/react";
 import { Link } from 'react-router-dom';
 import { useAuthContext } from "../Hooks/useAuthContext";
+import { useLogout } from "../Hooks/useLogout";
+import { useNavigate } from "react-router-dom";
 
 const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { user } = useAuthContext();
+  const { logout } = useLogout();
+  const navigate = useNavigate();
 
   const menuItems = [
     "Profile",
@@ -79,48 +83,78 @@ const NavBar = () => {
               base: "gap-4",
             }}
           >
-            <DropdownItem
-              key="autoscaling"
-              description="ACME scales apps based on demand and load"
-            >
-              Autoscaling
-            </DropdownItem>
-            <DropdownItem
-              key="usage_metrics"
-              description="Real-time metrics to debug issues"
-            >
-              Usage Metrics
-            </DropdownItem>
-            <DropdownItem
-              key="production_ready"
-              description="ACME runs on ACME, join us at web scale"
-            >
-              Production Ready
-            </DropdownItem>
-            <DropdownItem
-              key="99_uptime"
-              description="High availability and uptime guarantees"
-            >
-              +99% Uptime
-            </DropdownItem>
-            <DropdownItem
-              key="supreme_support"
-              description="Support team ready to respond"
-            >
-              +Supreme Support
-            </DropdownItem>
+            <DropdownSection showDivider title = "Solve">
+              <DropdownItem
+                key="CommunityProblems"
+              >
+                Community Problems
+              </DropdownItem>
+              <DropdownItem
+                key="usage_metrics"
+              >
+                Oficial problems
+              </DropdownItem>
+            </DropdownSection>
+            <DropdownSection title = "Special">
+              <DropdownItem
+                key="Oficial problems"
+              >
+                Daily Challenge
+              </DropdownItem>
+              <DropdownItem
+                key="99_uptime"
+              >
+                1v1 Battle
+              </DropdownItem>
+            </DropdownSection>
+            <DropdownSection title = "Posting">
+              <DropdownItem
+                onClick={() => user ? navigate('/problems/createProblem') : navigate('/signin')}
+                key="Oficial problems"
+              >
+                Create Problem
+              </DropdownItem>
+            </DropdownSection>
           </DropdownMenu>
         </Dropdown>
         </NavbarItem>
         <NavbarItem>
           <p className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium">
-            Compete
+            Prizes
           </p>
         </NavbarItem>
         <NavbarItem>
-          <p className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium">
-            Contests
-          </p>
+          <Dropdown>
+            <NavbarItem>
+              <DropdownTrigger>
+                <p
+                  disableRipple
+                  className="bg-transparent data-[hover=true]:bg-transparent
+                  text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium"
+                  radius="sm"
+                  variant="light"
+                >
+                  Futures
+                </p>
+              </DropdownTrigger>
+            </NavbarItem>
+            <DropdownMenu
+              itemClasses={{
+                base: "gap-4",
+              }}
+            >
+              <DropdownItem
+                key="autoscaling"
+              >
+                Leaderboard
+              </DropdownItem>
+              <DropdownItem
+                key="usage_metrics"
+              >
+                Compiler
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         </NavbarItem>
       </NavbarContent>
       {user ?  (
@@ -138,38 +172,28 @@ const NavBar = () => {
                   />
                 </DropdownTrigger>
                 <DropdownMenu aria-label="Dropdown menu with description" variant="faded">
-                  <DropdownSection showDivider title="Actions">
+                  <DropdownSection showDivider>
                     <DropdownItem
+                      onClick={() => navigate(`profile/${user.username}`)}
                       key="new"
-                      description="Create a new file"
-                      shortcut="⌘N"
                     >
-                      New file
+                      Profile
                     </DropdownItem>
                     <DropdownItem
+                      onClick={() => navigate(`profile/${user.username}/settings`)}
                       key="copy"
-                      description="Copy the file link"
-                      shortcut="⌘C"
                     >
-                      Copy link
-                    </DropdownItem>
-                    <DropdownItem
-                      key="edit"
-                      description="Allows you to edit the file"
-                      shortcut="⌘⇧E"
-                    >
-                      Edit file
+                      Settings
                     </DropdownItem>
                   </DropdownSection>
-                  <DropdownSection title="Danger zone">
+                  <DropdownSection>
                     <DropdownItem
                       key="delete"
                       className="text-danger"
                       color="danger"
-                      description="Permanently delete the file"
-                      shortcut="⌘⇧D"
+                      onClick={() => logout()}
                     >
-                      Delete file
+                      Log Out
                     </DropdownItem>
                   </DropdownSection>
                 </DropdownMenu>

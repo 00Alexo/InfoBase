@@ -5,6 +5,7 @@ import { Button, Checkbox, Input } from "@heroui/react";
 import { FaGithub, FaGoogle, FaDiscord, FaEye, FaEyeSlash } from "react-icons/fa";
 import AuthShowcase from "../components/AuthShowcase";
 import { Link } from "react-router-dom";
+import NotFound from "./NotFound";
 
 const SignIn = () => {
     const { signin, error, isLoading, errorFields } = useSignIn();
@@ -18,6 +19,10 @@ const SignIn = () => {
         e.preventDefault();
         await signin(username, password);
     };
+
+    if(user){
+        return <NotFound/>
+    }
 
     return (                   
         <div className="flex flex-col lg:flex-row w-full h-[calc(100vh-67px)]">

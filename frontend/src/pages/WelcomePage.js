@@ -11,12 +11,16 @@ import Background from '../components/Background';
 import Navigation from '../components/Navigation';
 import Globe from '../components/Globe';
 import NavBar from '../components/NavBar'
+import { useLocation } from 'react-router-dom';
+import { useAuthContext } from '../Hooks/useAuthContext';
+import HomePage from './HomePage';
 
 const WelcomePage = () => {
   const navigate = useNavigate();
   const parallaxRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(0);
-
+  const location = useLocation();
+  const { user } = useAuthContext();
         
   // Track current page for navigation indicators
   useEffect(() => {
@@ -144,6 +148,11 @@ const WelcomePage = () => {
     }
   };
 
+  if(location.pathname === "/" && user){
+    return (
+      <HomePage/>
+    )
+  }
 
   return (
     <div className="relative w-full h-screen overflow-hidden">

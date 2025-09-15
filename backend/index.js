@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
 const userRoutes = require('./routes/userRoutes');
+const problemsRoutes = require('./routes/problemsRoutes');
 
 const allowedOrigin = process.env.ALLOWED_ORIGIN;
 
@@ -26,6 +27,7 @@ app.use((req, res, next) =>{
     next();
 })
 app.use('/api/user', userRoutes);
+app.use('/api/problems', problemsRoutes);
 
 mongoose.connect(process.env.mongoDB)
 .then(() => {
