@@ -134,7 +134,7 @@ const NavBar = () => {
                   radius="sm"
                   variant="light"
                 >
-                  Futures
+                  Features
                 </p>
               </DropdownTrigger>
             </NavbarItem>
