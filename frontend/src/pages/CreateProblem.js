@@ -1,13 +1,13 @@
 import {useCreateProblem} from '../Hooks/useCreateProblem';
 import { useState } from 'react';
 import { FaPencilAlt } from 'react-icons/fa';
-import Features from '../components/Features';
 
 const CreateProblem = () => {
     const { createProblem, error, isLoading, errorFields } = useCreateProblem();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [difficulty, setDifficulty] = useState('');
+    const [timeout, setTimeout] = useState(5000);
     const [tags, setTags] = useState([]);
     const [availableTags, setAvailableTags] = useState([
         {
@@ -72,7 +72,7 @@ const CreateProblem = () => {
         e?.preventDefault();
         console.log('Tags before submitting:', JSON.stringify(tags, null, 2));
         createProblem(title, description, difficulty, tags, 
-        cerinta, DateDeIntrare, DateDeIesire, Restrictii, Precizari, Exemple, Teste);
+        cerinta, DateDeIntrare, DateDeIesire, Restrictii, Precizari, Exemple, Teste, timeout);
     }
 
     const [currentStep, setCurrentStep] = useState(1);
@@ -394,7 +394,7 @@ const CreateProblem = () => {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
                                     <label className="block text-textCustomPrimary font-semibold mb-2">
                                         Constraints (Restrictii)
@@ -418,6 +418,32 @@ const CreateProblem = () => {
                                         className="w-full px-4 py-3 bg-gradient-to-br from-bgCustomCard to-bgCustomLight border border-primaryCustom/30 rounded-lg text-textCustomPrimary shadow-[0_8px_16px_rgba(0,0,0,0.3),0_0_0_1px_rgba(239,68,68,0.2)] focus:outline-none focus:border-primaryCustom focus:shadow-[0_8px_20px_rgba(239,68,68,0.4)] transition-all duration-300 resize-vertical"
                                         placeholder="Additional clarifications..."
                                     />
+                                </div>
+                                <div>
+                                    <label className="block text-textCustomPrimary font-semibold mb-2">
+                                        Timeout (milliseconds)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={timeout}
+                                        onChange={(e) => setTimeout(Math.max(50, Math.min(20000, parseInt(e.target.value) || 5000)))}
+                                        min="50"
+                                        max="20000"
+                                        step="25"
+                                        className="w-full px-4 py-3 bg-gradient-to-br from-bgCustomCard to-bgCustomLight border border-primaryCustom/30 rounded-lg text-textCustomPrimary shadow-[0_8px_16px_rgba(0,0,0,0.3),0_0_0_1px_rgba(239,68,68,0.2)] focus:outline-none focus:border-primaryCustom focus:shadow-[0_8px_20px_rgba(239,68,68,0.4)] transition-all duration-300"
+                                        placeholder="5000"
+                                    />
+                                    <div className="mt-2 space-y-1">
+                                        <p className="text-xs text-textCustomMuted">
+                                            Time limit before TIME_LIMIT_EXCEEDED
+                                        </p>
+                                        <p className="text-xs text-orange-400">
+                                            Range: 0.05s - 20s (Default: 5s)
+                                        </p>
+                                        <p className="text-xs text-red-400">
+                                            ⚠️ Timeout = 0 points for test case
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -62,6 +62,15 @@ const ProblemSchema = new mongoose.Schema({
     accepted:{
         type: Boolean,
         required: true
+    },
+    timeout:{
+        type: Number,
+        required: true
+    },
+    solutions:{
+        type: [Object],
+        default: [],
+        required: true
     }
   }, {timestamps: true});
 

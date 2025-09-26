@@ -4,7 +4,8 @@ const problemsModel = require('../models/problemsModel');
 const createProblem = async (req, res) => {
     try{
         let errorFields = [];
-        const {title, creator, description, difficulty, tags, cerinta, DateDeIntrare, DateDeIesire, Restrictii, Precizari, Exemple, Teste} = req.body;
+        const {title, creator, description, difficulty, tags, cerinta, DateDeIntrare, DateDeIesire, 
+            Restrictii, Precizari, Exemple, Teste, timeout} = req.body;
 
         if(!title){
             errorFields.push('title');
@@ -43,6 +44,11 @@ const createProblem = async (req, res) => {
             errorFields.push('Teste');
             return res.status(400).json({error: 'At least 3 tests are required!', errorFields});
         }
+        if(!timeout || timeout < 50 || timeout > 20000){
+            console.log(timeout);
+            errorFields.push('timeout');
+            return res.status(400).json({error: 'A valid timeout is required!', errorFields});
+        }
 
         const checkProblem = await problemsModel.findOne({title});
 
@@ -77,6 +83,7 @@ const createProblem = async (req, res) => {
             Precizari,
             Exemple,
             Teste,
+            timeout,
             official: false,
             accepted: false
         });
@@ -107,7 +114,58 @@ const getProblem = async (req, res) => {
     }
 }
 
+const getSubmissions = async (req, res) => {
+    try{
+        const { username, problemId } = req.query;
+
+        if(!username){
+            return res.status(400).json({ error: 'Username is required!' });
+        }
+        if(!problemId){
+            return res.status(400).json({ error: 'Problem ID is required!' });
+        }
+
+        const user = await userModel.findOne({ username: username.toLowerCase() });
+
+        if(!user){
+            return res.status(400).json({ error: 'User not found!' });
+        }
+
+        const submissions = user.submissions.filter(sub => sub.problemId.toString() === problemId.toString());
+
+        return res.status(200).json({ submissions });
+    }catch(error){
+        console.error(error.message);
+        return res.status(400).json(error.message);
+    }
+}
+
+const getSolutions = async (req, res) =>{
+    try{
+        const { problemId } = req.query;
+
+        if(!problemId){
+            return res.status(400).json({ error: 'Problem ID is required!' });
+        }
+
+        const problem = await problemsModel.findOne({ uniqueId: problemId });
+
+        if(!problem){
+            return res.status(400).json({ error: 'Problem not found!' });
+        }
+
+        const solutions = problem.solutions || [];
+
+        return res.status(200).json({ solutions });
+    }catch(error){
+        console.error(error.message);
+        return res.status(400).json(error.message);        
+    }
+}
+
 module.exports= {
     createProblem,
-    getProblem
+    getProblem,
+    getSubmissions,
+    getSolutions
 };

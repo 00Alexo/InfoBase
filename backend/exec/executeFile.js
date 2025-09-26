@@ -90,6 +90,144 @@ const executeCpp = async (code, sessionId) => {
     }
 }
 
+const testCpp = async (code, tests) => {
+    const results = [];
+
+    for(let i = 0; i<tests.length; i++){
+        const test = tests[i];
+        const sessionId = Date.now().toString() + '_test_' + i;
+        const tempDir = path.join(__dirname, '../temp');
+        const sourceFile = path.join(tempDir, `${sessionId}.cpp`);
+        const executableFile = path.join(tempDir, `${sessionId}.exe`);
+
+        try{
+            await fs.mkdir(tempDir, { recursive: true });
+            await fs.writeFile(sourceFile, code);
+
+            const compileResult = await new Promise((resolve) =>{
+                const compileProcess = spawn('g++', [sourceFile, '-o', executableFile, '-std=c++17']);
+                let compileError = '';
+
+                compileProcess.stderr.on('data', (data) => {
+                    compileError += data.toString();
+                });
+
+                compileProcess.on('close', (code) => {
+                    resolve({
+                        success: code === 0,
+                        error: compileError
+                    });
+                });
+            });
+
+            if (!compileResult.success) {
+                results.push({
+                    testCase: i + 1,
+                    status: 'COMPILATION_ERROR',
+                    error: compileResult.error,
+                    executionTime: 0
+                });
+                cleanup(sourceFile, executableFile);
+                continue;
+            }
+
+            const startTime = Date.now();
+            const executionResult = await new Promise((resolve) =>{
+                const runProcess = spawn(executableFile, [], {
+                    stdio: ['pipe', 'pipe', 'pipe']
+                });
+
+                let output = '';
+                let error = '';
+                let finished = false;
+
+                const timeout = setTimeout(() => {
+                    if (!finished) {
+                        runProcess.kill();
+                        resolve({
+                            output: output,
+                            error: 'Time Limit Exceeded',
+                            exitCode: -1,
+                            timeout: true
+                        });
+                    }
+                }, 5000);
+
+                runProcess.stdout.on('data', (data) =>{
+                    output += data.toString();
+                })
+
+                runProcess.stderr.on('data', (data) =>{
+                    error += data.toString();
+                })
+
+                runProcess.on('close', (code) =>{
+                    finished = true;
+                    clearTimeout(timeout);
+                    resolve({
+                        output: output,
+                        error: error,
+                        exitCode: code,
+                        timeout: false
+                    });
+                })
+
+                runProcess.on('error', (err) => {
+                    finished = true;
+                    clearTimeout(timeout);
+                    resolve({
+                        output: output,
+                        error: err.message,
+                        exitCode: -1,
+                        timeout: false
+                    });
+                });
+
+                if(test.input || test.intrare){
+                    runProcess.stdin.write((test.input || test.intrare) + '\n');
+                }
+
+                runProcess.stdin.end();
+            });
+
+            const executionTime = Date.now() - startTime;
+            const expectedOutput = (test.output || test.iesire).trim();
+            const actualOutput = executionResult.output.trim();
+            
+            let status;
+            if (executionResult.timeout) {
+                status = 'TIME_LIMIT_EXCEEDED';
+            } else if (executionResult.exitCode !== 0) {
+                status = 'RUNTIME_ERROR';
+            } else if (actualOutput === expectedOutput) {
+                status = 'ACCEPTED';
+            } else {
+                status = 'WRONG_ANSWER';
+            }
+
+            console.log(`Test Case ${i + 1}: Expected "${expectedOutput}", Got "${actualOutput}", Status: ${status}`);
+            results.push({
+                testCase: i + 1,
+                status: status,
+                error: executionResult.error || null,
+                executionTime: executionTime
+            });
+
+            cleanup(sourceFile, executableFile);
+        }catch(error){
+            results.push({
+                testCase: i + 1,
+                status: 'SYSTEM_ERROR',
+                error: error.message,
+                executionTime: 0
+            });
+            cleanup(sourceFile, executableFile);
+        }
+    }
+    
+    return results;
+}
+
 const sendInput = async (sessionId, input) => {
     const processData = activeProcesses.get(sessionId); // luam procesu activ dupa sessionId
     if(processData && processData.process){ // daca procesu exista
@@ -122,5 +260,6 @@ module.exports = {
     executeCpp,
     cleanup,
     sendInput,
-    terminateProcess
+    terminateProcess,
+    testCpp
 };

@@ -16,6 +16,11 @@ const UserSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    submissions:{
+        type: [Object],
+        default: [],
+        required: true
+    }
   }, {timestamps: true});
   
   const UserCollection = mongoose.model("UserCollection", UserSchema);

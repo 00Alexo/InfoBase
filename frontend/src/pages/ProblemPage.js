@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { useGetProblem } from "../Hooks/useGetProblem";
 import NotFound from "./NotFound";
-import { FaBook, FaCheck, FaCheckCircle, FaQuestion, FaClock, FaMemory, FaTag, FaUser, FaCalendar, FaArrowDown, FaChevronDown, FaRegCopy, FaCloud, FaPlaystation, FaPlay, FaStop } from "react-icons/fa";
+import { FaBook, FaCheck, FaCheckCircle, FaQuestion, FaClock, FaMemory, FaTag, FaUser, FaCalendar, FaArrowDown, FaChevronDown, FaRegCopy, FaCloud, FaPlaystation, FaPlay, FaStop, FaCoins } from "react-icons/fa";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CodeMirror from '@uiw/react-codemirror';
@@ -9,10 +9,12 @@ import { cpp } from "@codemirror/lang-cpp";
 import {java} from '@codemirror/lang-java';
 import {vscodeDark} from '@uiw/codemirror-theme-vscode'
 import React from "react";
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Avatar } from "@heroui/react";
 import io from 'socket.io-client';
+import { useAuthContext } from "../Hooks/useAuthContext";
 
 const ProblemPage = () => {
+    const { user } = useAuthContext();
     const navigate = useNavigate();
     const { uniqueId } = useParams();
     const { getProblem, refetchProblem, error, isLoading, problem } = useGetProblem(uniqueId);
@@ -105,6 +107,10 @@ int main(){
     const outputRef = useRef(null);
     const inputRef = useRef(null);  //variable pentru compiler, asincron cu backendu
     const isRunningRef = useRef(false); // ref pentru a urmari starea isRunning fara closure issues
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitResults, setSubmitResults] = useState(null);
+    const [showSubmitResults, setShowSubmitResults] = useState(false);
 
     useEffect(() =>{
         const newSocket = io(`${process.env.REACT_APP_API_SOCKET || 'http://localhost:4000'}`); // conectare la socketu de la backend
@@ -203,6 +209,98 @@ int main(){
         }
     }, [output]);
 
+    const [submissions, setSubmissions] = useState([]);
+
+    const getSubmissions = async () =>{
+        if(!user) return;
+
+        const response = await fetch(`${process.env.REACT_APP_API}/problems/getSubmissions?username=${user.username}&problemId=${uniqueId}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
+
+        const json = await response.json();
+
+        if(!response.ok){
+            console.log(json.error);
+        }
+
+        if(response.ok){
+            console.log(json.submissions);
+            setSubmissions(json.submissions.reverse());
+        }
+    }
+
+    const [solutions, setSolutions] = useState([]);
+
+    const getSolutions = async () =>{
+        if(!user) return;
+
+        const response = await fetch(`${process.env.REACT_APP_API}/problems/getSolutions?problemId=${uniqueId}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
+
+        const json = await response.json();
+
+        if(!response.ok){
+            console.log(json.error);
+        }
+
+        if(response.ok){
+            console.log(json.solutions);
+            setSolutions(json.solutions.reverse());
+        }
+    }
+
+    const handleSubmitCode = async () =>{
+        if (!value.trim()) {
+            alert('Please enter some code first!');
+            return;
+        }
+
+        setIsSubmitting(true);
+        setSubmitResults(null);
+        setShowSubmitResults(false);
+
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API}/compiler/submitCode`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    code: value, 
+                    language: language,
+                    problemId: uniqueId,
+                    username: user.username
+                })
+            });
+
+            const json = await response.json();
+
+            if (!response.ok) {
+                console.log(json.error);
+                setIsSubmitting(false);
+                getSubmissions();
+                getSolutions();
+                return;
+            }
+
+            if(response.ok){
+                getSubmissions();
+                getSolutions();
+                setSubmitResults(json);
+                setShowSubmitResults(true);
+            }
+
+
+        } catch (error) {
+            console.error('Submit error:', error);
+            alert(`Network Error: ${error.message}`);
+        }
+
+        setIsSubmitting(false);
+    }
+
     const handleRunCode = async () =>{
         if (!value.trim()) { // daca nu e cod, afisam in output si nu rulam
             setOutput('Invalid code input\n\n');
@@ -280,6 +378,23 @@ int main(){
         }
     };
 
+     const getStatusColor = (status) => {
+        switch (status) {
+            case 'ACCEPTED':
+                return 'text-green-400 bg-green-500/20 border-green-500/30';
+            case 'WRONG_ANSWER':
+                return 'text-red-400 bg-red-500/20 border-red-500/30';
+            case 'TIME_LIMIT_EXCEEDED':
+                return 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30';
+            case 'COMPILATION_ERROR':
+            case 'RUNTIME_ERROR':
+            case 'SYSTEM_ERROR':
+                return 'text-red-400 bg-red-500/20 border-red-500/30';
+            default:
+                return 'text-gray-400 bg-gray-500/20 border-gray-500/30';
+        }
+    };
+
     if(error == "Problem not found!"){
         return (
             <main className="min-h-[70vh] flex flex-col items-center justify-center bg-light p-4 z-30 relative">
@@ -321,7 +436,10 @@ int main(){
                             ? 'bg-[#404040] border-b-2 border-green-500 text-green-400' 
                             : 'text-gray-300 hover:text-white'
                     }`}
-                        onClick={() => setActivePage('solutions')}
+                        onClick={() => {
+                            setActivePage('solutions')
+                            getSolutions();
+                        }}
                     >
                         <FaQuestion className={`text-lg ${
                             activePage === 'solutions' ? 'text-green-400' : 'text-purple-400'
@@ -333,7 +451,10 @@ int main(){
                             ? 'bg-[#404040] border-b-2 border-yellow-500 text-yellow-400' 
                             : 'text-gray-300 hover:text-white'
                     }`}
-                        onClick={() => setActivePage('submissions')}
+                        onClick={() => {
+                            setActivePage('submissions')
+                            getSubmissions();
+                        }}
                     >
                         <FaCheckCircle className={`text-lg ${
                             activePage === 'submissions' ? 'text-yellow-400' : 'text-emerald-400'
@@ -464,14 +585,126 @@ int main(){
                             )}
                         </div>
                     ) : activePage === 'solutions' ? (
-                        <div className="p-4 text-center text-gray-400">
-                            <FaQuestion className="text-4xl mx-auto mb-4 opacity-50" />
-                            <p>Solutions section coming soon...</p>
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-xl font-bold text-white">Community Solutions</h2>
+                                <span className="text-sm text-gray-400">{solutions.length} solutions</span>
+                            </div>
+                            
+                            {solutions.length > 0 ? (
+                                <div className="space-y-2">
+                                    {solutions.map((solution, index) => {
+                                        const passedTests = solution.results ? solution.results.filter(r => r.status === 'ACCEPTED').length : 0;
+                                        const totalTests = solution.results ? solution.results.length : 0;
+                                        
+                                        return (
+                                            <div key={index} className="bg-[#1a1a1a] rounded-lg border border-gray-700 hover:border-gray-600 transition-colors p-3">
+                                                <div className="flex justify-between items-center">
+                                                    <div className="flex items-center gap-3">
+                                                        <Avatar
+                                                            showFallback
+                                                            name={solution.username ? solution.username.charAt(0).toUpperCase() : '?'}
+                                                            size="sm"
+                                                            className="border-2 border-red-700 hover:border-red-500 rounded-full"
+                                                            src=""
+                                                        />
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="text-white font-medium">
+                                                                {solution.username || 'Anonymous'}
+                                                            </span>
+                                                            <span className={`px-2 py-1 rounded text-xs font-medium border ${
+                                                                solution.score >= 100 
+                                                                    ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                                                                    : solution.score > 0
+                                                                    ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                                                                    : 'bg-red-500/20 text-red-400 border-red-500/30'
+                                                            }`}>
+                                                                {solution.score || 0} pts
+                                                            </span>
+                                                            <span className="text-gray-400 text-sm">
+                                                                {passedTests}/{totalTests} tests
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="text-sm text-gray-400">
+                                                        {solution.date ? new Date(solution.date).toLocaleString('ro-RO', {
+                                                            year: 'numeric',
+                                                            month: '2-digit',
+                                                            day: '2-digit',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        }) : 'Unknown date'}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="text-center py-12">
+                                    <FaUser className="text-6xl mx-auto mb-4 text-gray-600" />
+                                    <h3 className="text-xl font-medium text-gray-400 mb-2">No solutions yet</h3>
+                                    <p className="text-gray-500 mb-4">
+                                        Be the first to share a successful solution with the community!
+                                    </p>
+                                    <Button
+                                        onClick={handleSubmitCode}
+                                        disabled={isCompiling || isRunning || isSubmitting}
+                                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                                    >
+                                        <FaCloud className="mr-2" />
+                                        Submit Your Solution
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     ) : activePage === 'submissions' ? (
-                        <div className="p-4 text-center text-gray-400">
-                            <FaCheckCircle className="text-4xl mx-auto mb-4 opacity-50" />
-                            <p>Submissions section coming soon...</p>
+                        <div>
+                            {submissions.length > 0 ? (
+                                <div className="flex flex-col gap-2">
+                                    {submissions.map((submission, index) => {
+                                    const passedTests = submission.results ? submission.results.filter(r => r.status === 'ACCEPTED').length : 0;
+                                    const totalTests = submission.results ? submission.results.length : 0;
+                                    
+                                    return (
+                                        <div key={index} className="bg-[#1a1a1a] rounded-lg border border-gray-700 hover:border-gray-600 transition-colors p-3">
+                                            <div className="flex justify-between items-center">
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`px-2 py-1 rounded text-xs font-medium border ${
+                                                        submission.score >= 100 
+                                                            ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                                                            : submission.score > 0
+                                                            ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                                                            : 'bg-red-500/20 text-red-400 border-red-500/30'
+                                                    }`}>
+                                                        {submission.score || 0} pts
+                                                    </span>
+                                                    <span className="text-white font-medium">
+                                                        {passedTests}/{totalTests} tests
+                                                    </span>
+                                                </div>
+
+                                                <div className="text-sm text-gray-400">
+                                                    {submission.date ? new Date(submission.date).toLocaleString('ro-RO', {
+                                                        year: 'numeric',
+                                                        month: '2-digit',
+                                                        day: '2-digit',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    }) : 'Unknown date'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                </div>
+                            ) : (
+                                <div className="p-4 text-center text-gray-400">
+                                    <FaCheckCircle className="text-4xl mx-auto mb-4 opacity-50" />
+                                    <p>You haven't submitted any solutions...</p>
+                                </div>
+                            )}
                         </div>
                     ) : null}
                 </div>
@@ -521,11 +754,15 @@ int main(){
                             </Button>
                         )}
                         <Button
-                            variant="ghost" disabled={isCompiling || isRunning}
-                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 flex items-center gap-2 transition-colors duration-200"
+                            onClick={handleSubmitCode}
+                            disabled={isCompiling || isRunning || isSubmitting}
+                            variant="ghost"
+                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 flex items-center gap-2 transition-colors duration-200 disabled:bg-gray-500"
                         >
                             <FaCloud size="0.9em" />
-                            <span className="font-medium">Submit</span>
+                            <span className="font-medium">
+                                {isSubmitting ? 'Submitting...' : 'Submit'}
+                            </span>
                         </Button>
                     </div>
                 </div>
@@ -589,6 +826,78 @@ int main(){
                     </div>
                 </div>
             </div>
+            {showSubmitResults && submitResults && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-[#262626] text-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                        <div className="p-4 border-b border-gray-600 flex justify-between items-center">
+                            <h2 className="text-xl font-bold">Submission Results</h2>
+                            <button
+                                onClick={() => setShowSubmitResults(false)}
+                                className="text-gray-400 hover:text-white text-xl"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        
+                        <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
+                            <div className="mb-6 p-4 bg-[#1a1a1a] rounded border border-gray-700">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center justify-items-center">
+                                    <div>
+                                        <div className="text-2xl font-bold text-white">{submitResults.score}</div>
+                                        <div className="text-sm text-gray-400">Score</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-2xl font-bold text-green-400">{submitResults.passedTests}</div>
+                                        <div className="text-sm text-gray-400">Passed</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-2xl font-bold text-red-400">{submitResults.totalTests - submitResults.passedTests}</div>
+                                        <div className="text-sm text-gray-400">Failed</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-2xl font-bold text-blue-400">{submitResults.totalTests}</div>
+                                        <div className="text-sm text-gray-400">Total</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <h3 className="text-lg font-semibold text-white">Test Cases</h3>
+                                {submitResults.results.map((result, index) => (
+                                    <div key={index} className="bg-[#1a1a1a] rounded border border-gray-700 overflow-hidden">
+                                        <div className="p-3 bg-[#2a2a2a] flex justify-between items-center">
+                                            <span className="font-medium">Test Case {result.testCase}</span>
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-sm text-gray-400">{result.executionTime}ms</span>
+                                                <span className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(result.status)}`}>
+                                                    {result.status.replace('_', ' ')}
+                                                </span>
+                                                <span className={`px-2 py-1 rounded text-xs font-medium border ${
+                                                    (result.scorePerTest || 0) === 0 
+                                                        ? 'bg-red-500/20 text-red-400 border-red-500/30' 
+                                                        : 'bg-green-500/20 text-green-400 border-green-500/30'
+                                                }`}>
+                                                    {result.scorePerTest || 0} pts
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {result.error && (
+                                            <div className="p-3 space-y-3">
+                                                <div>
+                                                    <h5 className="text-sm font-medium text-red-400 mb-1">Error:</h5>
+                                                    <div className="bg-[#151515] p-2 rounded text-xs font-mono text-red-400 whitespace-pre-wrap">
+                                                        {result.error}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

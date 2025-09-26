@@ -9,11 +9,11 @@ export const useCreateProblem = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    const createProblem = async (title, description, difficulty, tags, cerinta, DateDeIntrare, DateDeIesire, Restrictii, Precizari, Exemple, Teste) => {
+    const createProblem = async (title, description, difficulty, tags, cerinta, DateDeIntrare, DateDeIesire, Restrictii, Precizari, Exemple, Teste, timeout) => {
         setError(null);
         setErrorFields([]);
         setIsLoading(true);
-        console.log('Creating problem with:', {title, description, difficulty, tags, cerinta, DateDeIntrare, DateDeIesire, Restrictii, Precizari, Exemple, Teste});
+        console.log('Creating problem with:', {title, description, difficulty, tags, cerinta, DateDeIntrare, DateDeIesire, Restrictii, Precizari, Exemple, Teste, timeout});
         console.log('Tags structure:', JSON.stringify(tags, null, 2));
 
         if (!user) {
@@ -40,7 +40,8 @@ export const useCreateProblem = () => {
                 Restrictii, 
                 Precizari, 
                 Exemple,
-                Teste
+                Teste,
+                timeout
             })
         });
 
