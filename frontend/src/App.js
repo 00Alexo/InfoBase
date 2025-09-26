@@ -9,6 +9,7 @@ import SignUp from './pages/SignUp';
 import { useLocation } from 'react-router-dom';
 import CreateProblem from './pages/CreateProblem';
 import ProblemPage from './pages/ProblemPage';
+import Compiler from './pages/Compiler';
 
 function AppContent() {
   const location = useLocation();
@@ -27,6 +28,8 @@ function AppContent() {
 
         <Route path = "/problems/createProblem" element={<CreateProblem/>}/>
         <Route path= "/problems/:uniqueId" element={<ProblemPage/>}/>
+
+        <Route path = "/compiler" element={<Compiler/>}/>
       </Routes>
     </div>
   );

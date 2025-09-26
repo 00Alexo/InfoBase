@@ -148,7 +148,7 @@ const NavBar = () => {
               >
                 Leaderboard
               </DropdownItem>
-              <DropdownItem
+              <DropdownItem onClick={() => navigate('/compiler')}
                 key="usage_metrics"
               >
                 Compiler
