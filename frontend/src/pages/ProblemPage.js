@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import CodeMirror from '@uiw/react-codemirror';
 import { cpp } from "@codemirror/lang-cpp";
 import {java} from '@codemirror/lang-java';
+import {python} from '@codemirror/lang-python';
 import {vscodeDark} from '@uiw/codemirror-theme-vscode'
 import React from "react";
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Avatar } from "@heroui/react";
@@ -56,9 +57,14 @@ int main(){
 
 public class Main {
     public static void main(String[] args) {
-        // write your code here
+        System.out.println("Hello, World");
     }
 }`)
+                break;
+            case 'Python':
+                setLanguage('Python');
+                setValue(`# Online Python Compiler, © 2025 InfoBase. All rights reserved. \nprint("Hello, World")
+`)
                 break;
             default:
                 setValue(`// Online C++ Compiler, © 2025 InfoBase. All rights reserved. \n#include <iostream>
@@ -80,6 +86,8 @@ int main(){
                 return [cpp()];
             case 'Java':
                 return [java()];
+            case 'Python':
+                return [python()];
             default:
                 return [cpp()];
         }
@@ -118,7 +126,17 @@ int main(){
         setSocket(newSocket);
 
         newSocket.on('connect', () => {
-            console.log('Connected to WebSocket server'); // setOutput la conectare
+            console.log('Connected to WebSocket server');
+            // Associate user with socket connection if logged in
+            if (user?.username) {
+                newSocket.emit('associate-user', { userId: user.username });
+                console.log('User associated with socket:', user.username);
+            } else {
+                // For anonymous users, create a temporary ID based on socket ID
+                const anonymousId = 'anon_' + newSocket.id;
+                newSocket.emit('associate-user', { userId: anonymousId });
+                console.log('Anonymous user connected with ID:', anonymousId);
+            }
         })
 
         newSocket.on('disconnect', () => {
@@ -197,7 +215,7 @@ int main(){
         });
 
         return () => newSocket.close();
-    }, [])
+    }, [user?.username]); // Re-run when user changes
 
     // Actualizeaza ref-ul cand se schimba isRunning
     useEffect(() => {
@@ -325,6 +343,11 @@ int main(){
             return;
         }
 
+        if (!user?.username) {
+            setOutput('❌ Error: User not authenticated. Please log in.\n\n');
+            return;
+        }
+
         setOutput('Compiling...\n');
         setIsCompiling(true);
         setIsRunning(false);
@@ -334,7 +357,11 @@ int main(){
             const response = await fetch(`${process.env.REACT_APP_API}/compiler/runCode`, { //apelam ruta din backend pt runCode
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ code: value, language: language })
+                body: JSON.stringify({ 
+                    code: value, 
+                    language: language,
+                    userId: user?.username // Add userId to request
+                })
             });
 
             const json = await response.json();
@@ -827,6 +854,7 @@ int main(){
                             >
                                 <DropdownItem key="C++">C++</DropdownItem>
                                 <DropdownItem key="Java">Java</DropdownItem>
+                                <DropdownItem key="Python">Python</DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
                     </div>

@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CodeMirror from '@uiw/react-codemirror';
 import { cpp } from "@codemirror/lang-cpp";
+import { python } from '@codemirror/lang-python';
 import {java} from '@codemirror/lang-java';
 import {vscodeDark} from '@uiw/codemirror-theme-vscode'
 import React from "react";
@@ -59,6 +60,11 @@ public class Main {
     }
 }`)
                 break;
+            case 'Python':
+                setLanguage('Python');
+                setValue(`# Online Python Compiler, © 2025 InfoBase. All rights reserved. \nprint("Hello, World")
+`)
+                break;
             default:
                 setValue(`// Online C++ Compiler, © 2025 InfoBase. All rights reserved. \n#include <iostream>
 
@@ -79,6 +85,8 @@ int main(){
                 return [cpp()];
             case 'Java':
                 return [java()];
+            case 'Python':
+                return [python()];
             default:
                 return [cpp()];
         }
@@ -91,6 +99,7 @@ int main(){
     const [isCompiling, setIsCompiling] = useState(false);
     const [socket, setSocket] = useState(null);
     const [waitingForInput, setWaitingForInput] = useState(false);
+    const [anonymousId, setAnonymousId] = useState(null); // Track anonymous user ID
     const outputRef = useRef(null);
     const inputRef = useRef(null);  //variable pentru compiler, asincron cu backendu
     const isRunningRef = useRef(false); // ref pentru a urmari starea isRunning fara closure issues
@@ -100,7 +109,19 @@ int main(){
         setSocket(newSocket);
 
         newSocket.on('connect', () => {
-            console.log('Connected to WebSocket server'); // setOutput la conectare
+            console.log('Connected to WebSocket server');
+            // Associate user with socket connection if logged in
+            if (user?.username) {
+                newSocket.emit('associate-user', { userId: user.username });
+                console.log('User associated with socket:', user.username);
+                setAnonymousId(null);
+            } else {
+                // For anonymous users, create a temporary ID based on socket ID
+                const anonymousId = 'anon_' + newSocket.id;
+                newSocket.emit('associate-user', { userId: anonymousId });
+                console.log('Anonymous user connected with ID:', anonymousId);
+                setAnonymousId(anonymousId);
+            }
         })
 
         newSocket.on('disconnect', () => {
@@ -179,7 +200,7 @@ int main(){
         });
 
         return () => newSocket.close();
-    }, []);
+    }, [user]); // Re-run when user login status changes
 
     useEffect(() => {
         isRunningRef.current = isRunning;
@@ -206,7 +227,11 @@ int main(){
             const response = await fetch(`${process.env.REACT_APP_API}/compiler/runCode`, { //apelam ruta din backend pt runCode
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ code: value, language: language })
+                body: JSON.stringify({ 
+                    code: value, 
+                    language: language,
+                    userId: user?.username || anonymousId // Send real username or anonymous ID
+                })
             });
 
             const json = await response.json();
@@ -294,6 +319,7 @@ int main(){
                         >
                             <DropdownItem key="C++">C++</DropdownItem>
                             <DropdownItem key="Java">Java</DropdownItem>
+                            <DropdownItem key="Python">Python</DropdownItem>
                         </DropdownMenu>
                     </Dropdown>
                 </div>
