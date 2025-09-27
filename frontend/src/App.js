@@ -11,21 +11,27 @@ import CreateProblem from './pages/CreateProblem';
 import ProblemPage from './pages/ProblemPage';
 import Compiler from './pages/Compiler';
 import ProblemList from './pages/ProblemList';
+import ProfilePage from './pages/ProfilePage';
+import { useGetProfile } from './Hooks/useGetProfile';
+import { useAuthContext } from './Hooks/useAuthContext';
 
 function AppContent() {
   const location = useLocation();
+  const { user } = useAuthContext();
+  const { getProfile, refetchProfile, error, isLoading, profile } = useGetProfile(user?.username);
 
   return (
     <div className="App bg-[#18191c] min-h-screen">
-      {location.pathname === '/' || location.pathname === '/welcome' ? null : <NavBar />}
+      {location.pathname === '/' || location.pathname === '/welcome' ? null : <NavBar userInfo={profile}/>}
       <Routes> 
         <Route path = "*" element={<NotFound/>}/>
-        <Route path = "/" element={<WelcomePage/>}/>
-        <Route path = "/welcome" element={<WelcomePage/>}/>
-        <Route path = "/home" element={<HomePage/>}/>
+        <Route path = "/" element={<WelcomePage userInfo={profile}/>}/>
+        <Route path = "/welcome" element={<WelcomePage userInfo={profile}/>}/>
+        <Route path = "/home" element={<HomePage userInfo={profile}/>}/>
 
         <Route path = "/signin" element={<SignIn/>}/>
         <Route path = "/signup" element={<SignUp/>}/>
+        <Route path = "/profile/:username" element={<ProfilePage/>}/>
 
         <Route path = "/problems/createProblem" element={<CreateProblem/>}/>
         <Route path = "/problems/:uniqueId" element={<ProblemPage/>}/>

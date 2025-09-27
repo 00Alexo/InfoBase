@@ -126,7 +126,81 @@ const signin = async (req, res) => {
     }
 }
 
+const getProfile = async (req, res) => {
+    try{
+        const { username } = req.params;
+
+        if (!username) { 
+            return res.status(400).json({ error: 'Invalid User.' });
+        }
+
+        const user = await userModel.findOne({ username: { $regex: new RegExp(`^${username}$`, 'i') } }).select('-password -email');
+
+        if(!user){
+            res.status(400).json({ error: "Invalid User."});
+        }
+
+        res.status(200).json(user);
+
+    }catch(error){
+        console.error(error.message);
+        return res.status(400).json(error.message);       
+    }
+}
+
+const editProfile = async (req, res) =>{
+    try{
+        const { username } = req.params;
+        const { bio, location, website, github, linkedin, gender } = req.body;
+
+        const user = await userModel.findOneAndUpdate(
+            { username: { $regex: new RegExp(`^${username}$`, 'i') } },
+            { bio, location, website, github, linkedin, gender },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(400).json({ error: "Invalid User." });
+        }
+
+        res.status(200).json(user);
+
+    }catch(error){
+        console.error(error.message);
+        return res.status(400).json(error.message);          
+    }
+}
+
+const editProfilePicture = async (req, res) => {
+    try{
+        const { username, profilePicture } = req.body;
+
+        if(!username)
+            return res.status(400).json({ error: "Invalid User." });
+
+        if(!profilePicture)
+            return res.status(400).json({error: 'Invalid profile picture'});
+        const user = await userModel.findOneAndUpdate(
+            { username: { $regex: new RegExp(`^${username}$`, 'i') } },
+            { profilePicture },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(400).json({ error: "Invalid User." });
+        }
+
+        res.status(200).json(user);
+    }catch(error){
+        console.error(error.message);
+        return res.status(400).json(error.message);    
+    }
+}
+
 module.exports = {
     signup,
-    signin
+    signin,
+    getProfile,
+    editProfile,
+    editProfilePicture
 }

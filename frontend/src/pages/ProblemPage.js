@@ -1,7 +1,8 @@
 import { Link, useParams } from "react-router-dom";
 import { useGetProblem } from "../Hooks/useGetProblem";
 import NotFound from "./NotFound";
-import { FaBook, FaCheck, FaCheckCircle, FaQuestion, FaClock, FaMemory, FaTag, FaUser, FaCalendar, FaArrowDown, FaChevronDown, FaRegCopy, FaCloud, FaPlaystation, FaPlay, FaStop, FaCoins } from "react-icons/fa";
+import { FaBook, FaCheck, FaCheckCircle, FaQuestion, FaClock, FaMemory, FaTag, FaUser, FaChevronLeft, FaChevronRight,
+    FaCalendar, FaArrowDown, FaChevronDown, FaRegCopy, FaCloud, FaPlaystation, FaPlay, FaStop, FaCoins } from "react-icons/fa";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CodeMirror from '@uiw/react-codemirror';
@@ -232,11 +233,17 @@ int main(){
     }
 
     const [solutions, setSolutions] = useState([]);
+    
+    // Solutions pagination state
+    const [solutionsCurrentPage, setSolutionsCurrentPage] = useState(1);
+    const [solutionsTotalPages, setSolutionsTotalPages] = useState(1);
+    const [totalSolutions, setTotalSolutions] = useState(0);
+    const solutionsPerPage = 5;
 
-    const getSolutions = async () =>{
+    const getSolutions = async (page = 1) =>{
         if(!user) return;
 
-        const response = await fetch(`${process.env.REACT_APP_API}/problems/getSolutions?problemId=${uniqueId}`, {
+        const response = await fetch(`${process.env.REACT_APP_API}/problems/getSolutions?problemId=${uniqueId}&page=${page}&limit=${solutionsPerPage}`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
         });
@@ -249,7 +256,18 @@ int main(){
 
         if(response.ok){
             console.log(json.solutions);
-            setSolutions(json.solutions.reverse());
+            setSolutions(json.solutions || []);
+            // Handle pagination if backend provides it
+            if (json.pagination) {
+                setSolutionsTotalPages(json.pagination.totalPages);
+                setSolutionsCurrentPage(json.pagination.currentPage);
+                setTotalSolutions(json.pagination.totalSolutions);
+            } else {
+                // Fallback for when backend doesn't provide pagination
+                setTotalSolutions(json.solutions ? json.solutions.length : 0);
+                setSolutionsTotalPages(1);
+                setSolutionsCurrentPage(1);
+            }
         }
     }
 
@@ -281,13 +299,13 @@ int main(){
                 console.log(json.error);
                 setIsSubmitting(false);
                 getSubmissions();
-                getSolutions();
+                getSolutions(solutionsCurrentPage);
                 return;
             }
 
             if(response.ok){
                 getSubmissions();
-                getSolutions();
+                getSolutions(solutionsCurrentPage);
                 setSubmitResults(json);
                 setShowSubmitResults(true);
             }
@@ -438,7 +456,8 @@ int main(){
                     }`}
                         onClick={() => {
                             setActivePage('solutions')
-                            getSolutions();
+                            setSolutionsCurrentPage(1); // Reset to first page when switching tabs
+                            getSolutions(1);
                         }}
                     >
                         <FaQuestion className={`text-lg ${
@@ -588,58 +607,139 @@ int main(){
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
                                 <h2 className="text-xl font-bold text-white">Community Solutions</h2>
-                                <span className="text-sm text-gray-400">{solutions.length} solutions</span>
+                                <span className="text-sm text-gray-400">
+                                    {totalSolutions > 0 ? `Showing ${solutions.length} of ${totalSolutions} solutions` : `${solutions.length} solutions`}
+                                </span>
                             </div>
                             
                             {solutions.length > 0 ? (
-                                <div className="space-y-2">
-                                    {solutions.map((solution, index) => {
-                                        const passedTests = solution.results ? solution.results.filter(r => r.status === 'ACCEPTED').length : 0;
-                                        const totalTests = solution.results ? solution.results.length : 0;
-                                        
-                                        return (
-                                            <div key={index} className="bg-[#1a1a1a] rounded-lg border border-gray-700 hover:border-gray-600 transition-colors p-3">
-                                                <div className="flex justify-between items-center">
-                                                    <div className="flex items-center gap-3">
-                                                        <Avatar
-                                                            showFallback
-                                                            name={solution.username ? solution.username.charAt(0).toUpperCase() : '?'}
-                                                            size="sm"
-                                                            className="border-2 border-red-700 hover:border-red-500 rounded-full"
-                                                            src=""
-                                                        />
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        {solutions.map((solution, index) => {
+                                            const passedTests = solution.results ? solution.results.filter(r => r.status === 'ACCEPTED').length : 0;
+                                            const totalTests = solution.results ? solution.results.length : 0;
+                                            
+                                            return (
+                                                <div key={index} className="bg-[#1a1a1a] rounded-lg border border-gray-700 hover:border-gray-600 transition-colors p-3">
+                                                    <div className="flex justify-between items-center">
                                                         <div className="flex items-center gap-3">
-                                                            <span className="text-white font-medium">
-                                                                {solution.username || 'Anonymous'}
-                                                            </span>
-                                                            <span className={`px-2 py-1 rounded text-xs font-medium border ${
-                                                                solution.score >= 100 
-                                                                    ? 'bg-green-500/20 text-green-400 border-green-500/30'
-                                                                    : solution.score > 0
-                                                                    ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-                                                                    : 'bg-red-500/20 text-red-400 border-red-500/30'
-                                                            }`}>
-                                                                {solution.score || 0} pts
-                                                            </span>
-                                                            <span className="text-gray-400 text-sm">
-                                                                {passedTests}/{totalTests} tests
-                                                            </span>
+                                                            <Avatar
+                                                                showFallback
+                                                                name={solution.username ? solution.username.charAt(0).toUpperCase() : '?'}
+                                                                size="sm"
+                                                                className="border-2 border-red-700 hover:border-red-500 rounded-full"
+                                                                src=""
+                                                            />
+                                                            <div className="flex items-center gap-3">
+                                                                <span className="text-white font-medium">
+                                                                    {solution.username || 'Anonymous'}
+                                                                </span>
+                                                                <span className={`px-2 py-1 rounded text-xs font-medium border ${
+                                                                    solution.score >= 100 
+                                                                        ? 'bg-green-500/20 text-green-400 border-green-500/30'
+                                                                        : solution.score > 0
+                                                                        ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                                                                        : 'bg-red-500/20 text-red-400 border-red-500/30'
+                                                                }`}>
+                                                                    {solution.score || 0} pts
+                                                                </span>
+                                                                <span className="text-gray-400 text-sm">
+                                                                    {passedTests}/{totalTests} tests
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="text-sm text-gray-400">
+                                                            {solution.date ? new Date(solution.date).toLocaleString('ro-RO', {
+                                                                year: 'numeric',
+                                                                month: '2-digit',
+                                                                day: '2-digit',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            }) : 'Unknown date'}
                                                         </div>
                                                     </div>
-
-                                                    <div className="text-sm text-gray-400">
-                                                        {solution.date ? new Date(solution.date).toLocaleString('ro-RO', {
-                                                            year: 'numeric',
-                                                            month: '2-digit',
-                                                            day: '2-digit',
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                        }) : 'Unknown date'}
-                                                    </div>
                                                 </div>
+                                            );
+                                        })}
+                                    </div>
+                                    
+                                    {/* Solutions Pagination */}
+                                    {solutionsTotalPages > 1 && (
+                                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-700/50">
+                                            <div className="text-sm text-gray-400">
+                                                Page {solutionsCurrentPage} of {solutionsTotalPages} • {totalSolutions} total solutions
                                             </div>
-                                        );
-                                    })}
+                                            
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        const newPage = solutionsCurrentPage - 1;
+                                                        setSolutionsCurrentPage(newPage);
+                                                        getSolutions(newPage);
+                                                    }}
+                                                    disabled={solutionsCurrentPage === 1}
+                                                    className="bg-[#1a1a1a] border border-gray-600 hover:border-red-500/50 text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    startContent={<FaChevronLeft className="text-xs" />}
+                                                >
+                                                    Previous
+                                                </Button>
+                                                
+                                                <div className="flex items-center gap-1">
+                                                    {/* Show page numbers */}
+                                                    {(() => {
+                                                        const pages = [];
+                                                        const showPages = 3; // Show 3 page numbers max for solutions
+                                                        let startPage = Math.max(1, solutionsCurrentPage - Math.floor(showPages / 2));
+                                                        let endPage = Math.min(solutionsTotalPages, startPage + showPages - 1);
+                                                        
+                                                        // Adjust start if we're near the end
+                                                        if (endPage - startPage < showPages - 1) {
+                                                            startPage = Math.max(1, endPage - showPages + 1);
+                                                        }
+                                                        
+                                                        // Add page numbers
+                                                        for (let i = startPage; i <= endPage; i++) {
+                                                            pages.push(
+                                                                <Button
+                                                                    key={i}
+                                                                    size="sm"
+                                                                    onClick={() => {
+                                                                        setSolutionsCurrentPage(i);
+                                                                        getSolutions(i);
+                                                                    }}
+                                                                    className={`min-w-8 h-8 ${
+                                                                        i === solutionsCurrentPage
+                                                                            ? "bg-red-600 text-white"
+                                                                            : "bg-[#1a1a1a] border border-gray-600 hover:border-red-500/50 text-gray-300"
+                                                                    }`}
+                                                                >
+                                                                    {i}
+                                                                </Button>
+                                                            );
+                                                        }
+                                                        
+                                                        return pages;
+                                                    })()}
+                                                </div>
+                                                
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        const newPage = solutionsCurrentPage + 1;
+                                                        setSolutionsCurrentPage(newPage);
+                                                        getSolutions(newPage);
+                                                    }}
+                                                    disabled={solutionsCurrentPage === solutionsTotalPages}
+                                                    className="bg-[#1a1a1a] border border-gray-600 hover:border-red-500/50 text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    endContent={<FaChevronRight className="text-xs" />}
+                                                >
+                                                    Next
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="text-center py-12">

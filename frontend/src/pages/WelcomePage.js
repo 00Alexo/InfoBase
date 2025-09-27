@@ -15,7 +15,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuthContext } from '../Hooks/useAuthContext';
 import HomePage from './HomePage';
 
-const WelcomePage = () => {
+const WelcomePage = ({userInfo}) => {
   const navigate = useNavigate();
   const parallaxRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -158,7 +158,7 @@ const WelcomePage = () => {
     <div className="relative w-full h-screen overflow-hidden">
       {/* Fixed NavBar */}
       <div className="fixed top-0 left-0 right-0 z-50">
-        <NavBar />
+        <NavBar userInfo={userInfo}/>
       </div>
       
       <style jsx>{`

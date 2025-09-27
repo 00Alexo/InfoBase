@@ -143,6 +143,8 @@ const getSubmissions = async (req, res) => {
 const getSolutions = async (req, res) =>{
     try{
         const { problemId } = req.query;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
 
         if(!problemId){
             return res.status(400).json({ error: 'Problem ID is required!' });
@@ -154,9 +156,27 @@ const getSolutions = async (req, res) =>{
             return res.status(400).json({ error: 'Problem not found!' });
         }
 
-        const solutions = problem.solutions || [];
+        const allSolutions = problem.solutions || [];
+        const totalSolutions = allSolutions.length;
+        
+        const totalPages = Math.ceil(totalSolutions / limit);
+        const skip = (page - 1) * limit;
 
-        return res.status(200).json({ solutions });
+        const paginatedSolutions = allSolutions
+            .sort((a, b) => new Date(b.date) - new Date(a.date)) 
+            .slice(skip, skip + limit);
+
+        return res.status(200).json({ 
+            solutions: paginatedSolutions,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalSolutions,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1,
+                limit
+            }
+        });
     }catch(error){
         console.error(error.message);
         return res.status(400).json(error.message);        
@@ -165,17 +185,14 @@ const getSolutions = async (req, res) =>{
 
 const getProblems = async (req, res) => {
     try{
-        const page = parseInt(req.query.page) || 1; // current page, default to 1
-        const limit = parseInt(req.query.limit) || 20; // problems per page, default to 20
-        const skip = (page - 1) * limit; // calculate how many to skip
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20; 
+        const skip = (page - 1) * limit;
 
-        // Extract filter parameters from query
         const { search, tags, classes, difficulty, sortBy } = req.query;
-        
-        // Build MongoDB filter object (start with accepted: true)
+
         let filter = { accepted: true };
         
-        // Search filter (title, description, creator)
         if (search && search.trim()) {
             filter.$or = [
                 { title: { $regex: search.trim(), $options: 'i' } },
@@ -184,15 +201,12 @@ const getProblems = async (req, res) => {
             ];
         }
         
-        // Difficulty filter
         if (difficulty && difficulty.trim()) {
             filter.difficulty = difficulty.trim();
         }
         
-        // Tags and classes filter
         const tagFilters = [];
         
-        // Handle topic tags (non-class tags)
         if (tags) {
             const tagArray = Array.isArray(tags) ? tags : [tags];
             tagArray.forEach(tag => {
@@ -208,8 +222,7 @@ const getProblems = async (req, res) => {
                 }
             });
         }
-        
-        // Handle class tags
+
         if (classes) {
             const classArray = Array.isArray(classes) ? classes : [classes];
             classArray.forEach(className => {
@@ -226,13 +239,11 @@ const getProblems = async (req, res) => {
             });
         }
         
-        // Add tag filters to main filter
         if (tagFilters.length > 0) {
             filter.$and = tagFilters;
         }
 
-        // Build sort object
-        let sort = { createdAt: -1 }; // Default: newest first
+        let sort = { createdAt: -1 };
         
         if (sortBy) {
             switch (sortBy) {
@@ -243,7 +254,6 @@ const getProblems = async (req, res) => {
                     sort = { title: 1 };
                     break;
                 case 'difficulty':
-                    // Custom sort: Easy, Medium, Hard
                     sort = { difficulty: 1, createdAt: -1 };
                     break;
                 case 'newest':
@@ -256,11 +266,9 @@ const getProblems = async (req, res) => {
         console.log("Applied filter:", JSON.stringify(filter, null, 2));
         console.log("Applied sort:", JSON.stringify(sort, null, 2));
 
-        // Get total count for pagination info with filters applied
         const totalProblems = await problemsModel.countDocuments(filter);
         const totalPages = Math.ceil(totalProblems / limit);
 
-        // Get paginated problems with filters and sorting
         const problems = await problemsModel.find(filter)
             .select('-Teste -solutions')
             .sort(sort)

@@ -21,7 +21,7 @@ import { useLogout } from "../Hooks/useLogout";
 import { useNavigate } from "react-router-dom";
 import { FaCode } from "react-icons/fa";
 
-const NavBar = () => {
+const NavBar = ({userInfo}) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { user } = useAuthContext();
   const { logout } = useLogout();
@@ -147,12 +147,13 @@ const NavBar = () => {
               }}
             >
               <DropdownItem
-                key="autoscaling"
+                key="leaderboard"
               >
                 Leaderboard
               </DropdownItem>
-              <DropdownItem onClick={() => navigate('/compiler')}
-                key="usage_metrics"
+              <DropdownItem 
+                onClick={() => navigate('/compiler')}
+                key="compiler"
               >
                 Compiler
               </DropdownItem>
@@ -171,7 +172,7 @@ const NavBar = () => {
                       as="button"
                       size="md"
                       className="transition-transform border-2 border-red-700 hover:border-red-500 rounded-full duration-300"
-                      src={""}
+                      src={userInfo?.profilePictureUrl || ""}
                   />
                 </DropdownTrigger>
                 <DropdownMenu aria-label="Dropdown menu with description" variant="faded">

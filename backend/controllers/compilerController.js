@@ -1,6 +1,7 @@
 const { executeCpp, testCpp } = require('../exec/executeFile');
 const problemsModel = require('../models/problemsModel');
 const userModel = require('../models/userModel');
+const achievementManager = require('../managers/achievementManager');
 
 const runCode = async (req, res) =>{
     try{
@@ -70,6 +71,8 @@ const submitCode = async (req, res) =>{
         problemId: problemId,
         date: new Date(),
         score: totalScore,
+        difficulty: problemData.difficulty,
+        language: language,
         results: resultsWithScore,
         solution: code
     }
@@ -82,8 +85,10 @@ const submitCode = async (req, res) =>{
     const problemSolution = {
         username: username.toLowerCase(),
         date: new Date(),
+        difficulty: problemData.difficulty,
         score: totalScore,
         results: resultsWithScore,
+        language: language,
         solution: code
     }
 
@@ -91,6 +96,19 @@ const submitCode = async (req, res) =>{
         { uniqueId: problemId },
         { $push: { solutions: problemSolution } }
     );
+
+    const problemSolved = user.solvedProblems.find(p => p.problemId === problemId);
+
+    if(!problemSolved && totalScore === 100){
+        user.solvedProblems.push({ problemId: problemId, date: new Date() });
+        await user.save();
+    }
+
+    const achievementMgr = new achievementManager(user);
+
+    if(!problemSolved && totalScore === 100){
+        await achievementMgr.onProblemSolved();  
+    }
 
     return res.status(200).json({
         success: true,
