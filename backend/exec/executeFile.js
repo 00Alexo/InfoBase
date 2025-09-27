@@ -280,6 +280,7 @@ const terminateProcess = (sessionId) => {
     }
     return false; // returnam false la index.js
 }
+
 const cleanup = async (sourceFile, executableFile) => {
     try{
         await fs.unlink(sourceFile).catch(() => {}); // stergem fisieru sursa
