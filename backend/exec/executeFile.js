@@ -35,11 +35,34 @@ const executeCpp = async (code, sessionId) => {
                 stdio: ['pipe', 'pipe', 'pipe']
             }); // rulam codu compilat
 
+            let programFinished = false; // flag pentru a urmari daca programu s-a terminat
+
             activeProcesses.set(sessionId, {
                 process: runProcess,
                 sourceFile,
                 executableFile
             }); // salvam procesu activ cu fisieru sursa si executabilu
+
+            // Timeout de 20 secunde
+            const timeoutId = setTimeout(() => {
+                if (!programFinished) {
+                    programFinished = true;
+                    runProcess.kill('SIGKILL'); // terminam fortat procesu
+                    
+                    global.io.emit('program-error', {
+                        sessionId,
+                        error: 'TIME_LIMIT_EXCEEDED: Program terminated after 20 seconds'
+                    }); // emit timeout error la client
+                    
+                    global.io.emit('program-finished', {
+                        sessionId,
+                        exitCode: -1
+                    }); // emit la client ca programu s-a terminat
+                    
+                    activeProcesses.delete(sessionId);
+                    cleanup(sourceFile, executableFile);
+                }
+            }, 20000); // 20 secunde timeout
 
             runProcess.stdout.on('data', (data) => {
                 global.io.emit('program-output', {
@@ -56,23 +79,33 @@ const executeCpp = async (code, sessionId) => {
             });
 
             runProcess.on('close', (code) => {
-                global.io.emit('program-finished', {
-                    sessionId,
-                    exitCode: code
-                }); // emit la client ca programu s-a terminat
-                
-                activeProcesses.delete(sessionId);
-                cleanup(sourceFile, executableFile);
+                if (!programFinished) {
+                    programFinished = true;
+                    clearTimeout(timeoutId); // clear timeout daca programu se termina normal
+                    
+                    global.io.emit('program-finished', {
+                        sessionId,
+                        exitCode: code
+                    }); // emit la client ca programu s-a terminat
+                    
+                    activeProcesses.delete(sessionId);
+                    cleanup(sourceFile, executableFile);
+                }
             });
 
             runProcess.on('error', (error) => {
-                global.io.emit('program-error', { // emit la client eroarea de runtime
-                    sessionId,
-                    error: error.message
-                });
-                
-                activeProcesses.delete(sessionId); // scoatem procesu din lista de active
-                cleanup(sourceFile, executableFile); // stergem fisierele temporare
+                if (!programFinished) {
+                    programFinished = true;
+                    clearTimeout(timeoutId); // clear timeout daca e eroare
+                    
+                    global.io.emit('program-error', { // emit la client eroarea de runtime
+                        sessionId,
+                        error: error.message
+                    });
+                    
+                    activeProcesses.delete(sessionId); // scoatem procesu din lista de active
+                    cleanup(sourceFile, executableFile); // stergem fisierele temporare
+                }
             });
 
             global.io.emit('program-started', { // emit la client ca programu a pornit si poate trimite input
@@ -90,7 +123,7 @@ const executeCpp = async (code, sessionId) => {
     }
 }
 
-const testCpp = async (code, tests) => {
+const testCpp = async (code, tests, timeLimit) => {
     const results = [];
 
     for(let i = 0; i<tests.length; i++){
@@ -151,7 +184,7 @@ const testCpp = async (code, tests) => {
                             timeout: true
                         });
                     }
-                }, 5000);
+                }, timeLimit);
 
                 runProcess.stdout.on('data', (data) =>{
                     output += data.toString();
@@ -240,7 +273,7 @@ const sendInput = async (sessionId, input) => {
 const terminateProcess = (sessionId) => {
     const processData = activeProcesses.get(sessionId); // luam procesu activ dupa sessionId   
     if (processData) {
-        processData.process.kill(); // terminam procesu
+        processData.process.kill('SIGKILL'); // terminam procesu cu force kill
         activeProcesses.delete(sessionId); // scoatem procesu din lista de active
         cleanup(processData.sourceFile, processData.executableFile); // stergem fisierele temporare
         return true; // returnam true la index.js

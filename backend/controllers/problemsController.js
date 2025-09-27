@@ -163,9 +163,155 @@ const getSolutions = async (req, res) =>{
     }
 }
 
+const getProblems = async (req, res) => {
+    try{
+        const page = parseInt(req.query.page) || 1; // current page, default to 1
+        const limit = parseInt(req.query.limit) || 20; // problems per page, default to 20
+        const skip = (page - 1) * limit; // calculate how many to skip
+
+        // Extract filter parameters from query
+        const { search, tags, classes, difficulty, sortBy } = req.query;
+        
+        // Build MongoDB filter object (start with accepted: true)
+        let filter = { accepted: true };
+        
+        // Search filter (title, description, creator)
+        if (search && search.trim()) {
+            filter.$or = [
+                { title: { $regex: search.trim(), $options: 'i' } },
+                { description: { $regex: search.trim(), $options: 'i' } },
+                { creator: { $regex: search.trim(), $options: 'i' } }
+            ];
+        }
+        
+        // Difficulty filter
+        if (difficulty && difficulty.trim()) {
+            filter.difficulty = difficulty.trim();
+        }
+        
+        // Tags and classes filter
+        const tagFilters = [];
+        
+        // Handle topic tags (non-class tags)
+        if (tags) {
+            const tagArray = Array.isArray(tags) ? tags : [tags];
+            tagArray.forEach(tag => {
+                if (tag.trim()) {
+                    tagFilters.push({
+                        "tags": {
+                            $elemMatch: {
+                                "name": tag.trim(),
+                                "class": { $ne: true }
+                            }
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Handle class tags
+        if (classes) {
+            const classArray = Array.isArray(classes) ? classes : [classes];
+            classArray.forEach(className => {
+                if (className.trim()) {
+                    tagFilters.push({
+                        "tags": {
+                            $elemMatch: {
+                                "name": className.trim(),
+                                "class": true
+                            }
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Add tag filters to main filter
+        if (tagFilters.length > 0) {
+            filter.$and = tagFilters;
+        }
+
+        // Build sort object
+        let sort = { createdAt: -1 }; // Default: newest first
+        
+        if (sortBy) {
+            switch (sortBy) {
+                case 'oldest':
+                    sort = { createdAt: 1 };
+                    break;
+                case 'title':
+                    sort = { title: 1 };
+                    break;
+                case 'difficulty':
+                    // Custom sort: Easy, Medium, Hard
+                    sort = { difficulty: 1, createdAt: -1 };
+                    break;
+                case 'newest':
+                default:
+                    sort = { createdAt: -1 };
+                    break;
+            }
+        }
+
+        console.log("Applied filter:", JSON.stringify(filter, null, 2));
+        console.log("Applied sort:", JSON.stringify(sort, null, 2));
+
+        // Get total count for pagination info with filters applied
+        const totalProblems = await problemsModel.countDocuments(filter);
+        const totalPages = Math.ceil(totalProblems / limit);
+
+        // Get paginated problems with filters and sorting
+        const problems = await problemsModel.find(filter)
+            .select('-Teste -solutions')
+            .sort(sort)
+            .skip(skip)
+            .limit(limit);
+
+        return res.status(200).json({ 
+            problems,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalProblems,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1,
+                limit
+            },
+            filters: {
+                search,
+                tags,
+                classes,
+                difficulty,
+                sortBy
+            }
+        });
+    }catch(error){
+        console.error(error.message);
+        return res.status(400).json(error.message);
+    }
+}
+
+const acceptAllProblems = async (req, res) => {
+    try{
+        const { creator } = req.body;
+
+        if(creator !== "alex")
+            return res.status(400).json({ error: 'Unauthorized!' });
+
+        await problemsModel.updateMany({ accepted: false }, { $set: { accepted: true } });
+
+        res.status(200).json({ message: 'All problems accepted successfully!' });
+    }catch(error){
+        console.error(error.message);
+        return res.status(400).json(error.message);  
+    }
+}
+
 module.exports= {
     createProblem,
     getProblem,
     getSubmissions,
-    getSolutions
+    getSolutions,
+    getProblems,
+    acceptAllProblems
 };

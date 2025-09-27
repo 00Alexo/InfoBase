@@ -19,6 +19,7 @@ import { Link } from 'react-router-dom';
 import { useAuthContext } from "../Hooks/useAuthContext";
 import { useLogout } from "../Hooks/useLogout";
 import { useNavigate } from "react-router-dom";
+import { FaCode } from "react-icons/fa";
 
 const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -85,11 +86,13 @@ const NavBar = () => {
           >
             <DropdownSection showDivider title = "Solve">
               <DropdownItem
+                onClick={(() => navigate('/problems/list'))}
                 key="CommunityProblems"
               >
                 Community Problems
               </DropdownItem>
               <DropdownItem
+                onClick={(() => navigate('/problems/list'))}
                 key="usage_metrics"
               >
                 Oficial problems

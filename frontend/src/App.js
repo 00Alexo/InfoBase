@@ -10,6 +10,7 @@ import { useLocation } from 'react-router-dom';
 import CreateProblem from './pages/CreateProblem';
 import ProblemPage from './pages/ProblemPage';
 import Compiler from './pages/Compiler';
+import ProblemList from './pages/ProblemList';
 
 function AppContent() {
   const location = useLocation();
@@ -27,7 +28,8 @@ function AppContent() {
         <Route path = "/signup" element={<SignUp/>}/>
 
         <Route path = "/problems/createProblem" element={<CreateProblem/>}/>
-        <Route path= "/problems/:uniqueId" element={<ProblemPage/>}/>
+        <Route path = "/problems/:uniqueId" element={<ProblemPage/>}/>
+        <Route path = "/problems/list" element={<ProblemList/>}/>
 
         <Route path = "/compiler" element={<Compiler/>}/>
       </Routes>

@@ -52,7 +52,9 @@ const submitCode = async (req, res) =>{
 
     console.log(`${teste.length} for: ${problemId}`);
 
-    const results = await testCpp(code, teste);
+    const timeLimit = problemData.timeout || 5000;
+
+    const results = await testCpp(code, teste, timeLimit);
 
     const totalTests = results.length;
     const passedTests = results.filter(r => r.status === 'ACCEPTED').length;
