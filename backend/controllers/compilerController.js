@@ -1,17 +1,35 @@
-const { executeCpp, testCpp } = require('../exec/executeFile');
+const { executeCpp, testCpp, executeJava, testJava, executePython, testPython } = require('../exec/executeFile');
 const problemsModel = require('../models/problemsModel');
 const userModel = require('../models/userModel');
 const achievementManager = require('../managers/achievementManager');
 
 const runCode = async (req, res) =>{
     try{
-        const { code, language } = req.body;
-        const sessionId = Date.now().toString();
+        const { code, language, userId } = req.body;
+        const sessionId = Date.now().toString() + '_' + Math.random().toString(36).substring(2, 15);
+
+        let targetSocket = null;
+
+        if (userId) {
+            targetSocket = global.userSockets.get(userId);
+        }
+
+        if (!targetSocket) {
+            return res.status(400).json({ error: 'WebSocket connection not found. Please refresh the page.' });
+        }
+
+        global.socketSessions.set(sessionId, targetSocket.id);
 
         console.log(code, language)
 
         if(language === "C++"){
-            await executeCpp(code, sessionId);
+            await executeCpp(code, sessionId, targetSocket);
+            return res.status(200).json({ sessionId: sessionId });
+        }else if(language === "Java"){
+            await executeJava(code, sessionId, targetSocket);
+            return res.status(200).json({ sessionId: sessionId });
+        }else if(language === "Python"){
+            await executePython(code, sessionId, targetSocket);
             return res.status(200).json({ sessionId: sessionId });
         }
         
@@ -25,7 +43,7 @@ const runCode = async (req, res) =>{
 const submitCode = async (req, res) =>{
     const { code, language, problemId, username } = req.body;
 
-    if (language !== "C++") {
+    if (language !== "C++" && language !== "Java" && language !== "Python") {
         return res.status(400).json({ error: 'Unsupported language!' });
     }
 
@@ -55,7 +73,15 @@ const submitCode = async (req, res) =>{
 
     const timeLimit = problemData.timeout || 5000;
 
-    const results = await testCpp(code, teste, timeLimit);
+    let results
+
+    if(language === "C++"){
+        results = await testCpp(code, teste, timeLimit);
+    }else if(language === "Java"){
+        results = await testJava(code, teste, timeLimit);
+    }else if(language === "Python"){
+        results = await testPython(code, teste, timeLimit);
+    }
 
     const totalTests = results.length;
     const passedTests = results.filter(r => r.status === 'ACCEPTED').length;

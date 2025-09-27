@@ -8,6 +8,11 @@ const app = express();
 const server = http.createServer(app);
 
 const { sendInput, terminateProcess } = require('./exec/executeFile');
+
+// Map to store socket connections by user/session
+const socketSessions = new Map(); // sessionId -> socketId  
+const userSockets = new Map(); // userId -> socket (includes anonymous users)
+
 const userRoutes = require('./routes/userRoutes');
 const problemsRoutes = require('./routes/problemsRoutes');
 const compilerRoutes = require('./routes/compilerRoutes');
@@ -22,6 +27,8 @@ const io = socketIo(server, {
 });
 
 global.io = io;
+global.socketSessions = socketSessions;
+global.userSockets = userSockets;
 
 const corsOptions = {
     origin: allowedOrigin,
@@ -56,6 +63,14 @@ mongoose.connect(process.env.mongoDB)
 io.on('connection', (socket) => {
     console.log('Compiler connected:', socket.id);
 
+    socket.on('associate-user', (data) => {
+        const { userId } = data;
+        if (userId) {
+            userSockets.set(userId, socket);
+            socket.userId = userId; 
+        }
+    });
+
     socket.on('send-input', (data) => {
         const {sessionId, input} = data;
         const succes = sendInput(sessionId, input);
@@ -70,8 +85,18 @@ io.on('connection', (socket) => {
         terminateProcess(sessionId);
     });
 
-        socket.on('disconnect', () => {
+    socket.on('disconnect', () => {
         console.log('Compiler disconnected:', socket.id);
+        
+        if (socket.userId) {
+            userSockets.delete(socket.userId);
+        }
+
+        for (const [sessionId, socketId] of socketSessions.entries()) {
+            if (socketId === socket.id) {
+                socketSessions.delete(sessionId);
+            }
+        }
     });
 });
 
