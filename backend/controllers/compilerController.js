@@ -126,7 +126,7 @@ const submitCode = async (req, res) =>{
     const problemSolved = user.solvedProblems.find(p => p.problemId === problemId);
 
     if(!problemSolved && totalScore === 100){
-        user.solvedProblems.push({ problemId: problemId, date: new Date(), tags: problemData.tags });
+        user.solvedProblems.push({ problemId: problemId, date: new Date(), tags: problemData.tags, language: language });
         await user.save();
     }
 

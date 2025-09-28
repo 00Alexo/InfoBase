@@ -16,6 +16,7 @@ import { useGetProfile } from './Hooks/useGetProfile';
 import { useAuthContext } from './Hooks/useAuthContext';
 import CodeBattles from './pages/CodeBattles';
 import DailyChallenge from './pages/DailyChallenge';
+import LeaderBoard from './pages/Leaderboard';
 
 function AppContent() {
   const location = useLocation();
@@ -40,6 +41,8 @@ function AppContent() {
         <Route path = "/problems/list" element={<ProblemList/>}/>
         <Route path = "/problems/codeBattles" element={<CodeBattles/>}/>
         <Route path = "/problems/dailyChallenge" element={<DailyChallenge userInfo={profile}/>}/>
+
+        <Route path = "/leaderboard" element={<LeaderBoard/>}/>
 
         <Route path = "/compiler" element={<Compiler/>}/>
       </Routes>

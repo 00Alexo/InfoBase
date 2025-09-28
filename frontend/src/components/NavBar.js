@@ -143,6 +143,7 @@ const NavBar = ({userInfo}) => {
               }}
             >
               <DropdownItem
+                onClick={() => navigate('/leaderboard')}
                 key="leaderboard"
               >
                 Leaderboard
@@ -180,7 +181,7 @@ const NavBar = ({userInfo}) => {
                       Profile
                     </DropdownItem>
                     <DropdownItem
-                      onClick={() => navigate(`profile/${user.username}/settings`)}
+                      onClick={() => navigate(`profile/${user.username}`)}
                       key="copy"
                     >
                       Settings

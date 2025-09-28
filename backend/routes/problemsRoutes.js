@@ -7,7 +7,8 @@ const{
     getProblems,
     acceptAllProblems,
     addProblemToCalendar,
-    getCalendar
+    getCalendar,
+    getLeaderboard
 } = require('../controllers/problemsController');
 
 const router = express.Router();
@@ -20,5 +21,6 @@ router.get('/getProblems', getProblems);
 router.post('/acceptAllProblems', acceptAllProblems);
 router.post('/addProblemToCalendar', addProblemToCalendar);
 router.get('/getCalendar', getCalendar);
+router.get('/getLeaderboard', getLeaderboard);
 
 module.exports= router;
