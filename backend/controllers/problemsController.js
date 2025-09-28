@@ -1,5 +1,6 @@
 const userModel = require('../models/userModel');
 const problemsModel = require('../models/problemsModel');
+const calendarModel = require('../models/calendarModel');
 
 const createProblem = async (req, res) => {
     try{
@@ -315,11 +316,59 @@ const acceptAllProblems = async (req, res) => {
     }
 }
 
+const addProblemToCalendar = async (req, res) => {
+    try{
+        const { problemId, specialDate } = req.body;
+        console.log(problemId, specialDate);
+
+        if(!problemId && problemId !== 0){
+            return res.status(400).json({ error: 'Problem ID is required!' });
+        }
+
+        if(!specialDate){
+            return res.status(400).json({ error: 'Special date is required!' });
+        }
+
+        const problem = await problemsModel.findOne({ uniqueId: problemId });
+
+        if(!problem){
+            return res.status(400).json({ error: 'Problem not found!' });
+        }
+
+        const problemName = problem.title;
+        const problemDifficulty = problem.difficulty;
+
+        const calendar = await calendarModel.create({
+            problemId,
+            problemName,
+            problemDifficulty,
+            specialDate
+        });
+
+        res.status(200).json(calendar);
+    }catch(error){
+        console.error(error.message);
+        return res.status(400).json(error.message);  
+    }
+}
+
+const getCalendar = async (req, res) => {
+    try{
+        const calendarEntries = await calendarModel.find().sort({ specialDate: 1 });
+        res.status(200).json(calendarEntries);
+    }catch(error){
+        console.error(error.message);
+        return res.status(400).json(error.message);  
+    }
+}
+
 module.exports= {
     createProblem,
     getProblem,
     getSubmissions,
     getSolutions,
     getProblems,
-    acceptAllProblems
+    acceptAllProblems,
+    addProblemToCalendar,
+    getCalendar
 };

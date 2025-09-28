@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const monthNames = [
@@ -6,35 +7,38 @@ const monthNames = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-const mockProblems = [
-  { name: "Two Sum", difficulty: "Easy" },
-  { name: "Valid Parentheses", difficulty: "Easy" },
-  { name: "Merge Two Sorted Lists", difficulty: "Easy" },
-  { name: "Best Time to Buy Stock", difficulty: "Easy" },
-  { name: "Valid Palindrome", difficulty: "Easy" },
-  { name: "Invert Binary Tree", difficulty: "Easy" },
-  { name: "Binary Search", difficulty: "Easy" },
-  { name: "Flood Fill", difficulty: "Easy" },
-  { name: "Maximum Subarray", difficulty: "Easy" },
-  { name: "Climbing Stairs", difficulty: "Easy" },
-  { name: "Add Two Numbers", difficulty: "Medium" },
-  { name: "Longest Substring", difficulty: "Medium" },
-  { name: "Container With Water", difficulty: "Medium" },
-  { name: "3Sum", difficulty: "Medium" },
-  { name: "Group Anagrams", difficulty: "Medium" },
-  { name: "Product Except Self", difficulty: "Medium" },
-  { name: "Valid Sudoku", difficulty: "Medium" },
-  { name: "Rotate Image", difficulty: "Medium" },
-  { name: "Spiral Matrix", difficulty: "Medium" },
-  { name: "Jump Game", difficulty: "Medium" },
-  { name: "Median of Arrays", difficulty: "Hard" },
-  { name: "Trapping Rain Water", difficulty: "Hard" },
-  { name: "Merge k Sorted Lists", difficulty: "Hard" },
-  { name: "Word Ladder", difficulty: "Hard" },
-  { name: "Serialize Binary Tree", difficulty: "Hard" },
-];
-
 const DailyChallenge = ({ onClick, userInfo }) => {
+  const navigate = useNavigate();
+  const [dailyProblems, setDailyProblems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const getDailyProblems = async () => {
+    setLoading(true);
+    const response = await fetch(`${process.env.REACT_APP_API}/problems/getCalendar`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    const json = await response.json();
+
+    if (response.ok) {
+      setDailyProblems(json);
+      setLoading(false);
+    }
+
+    if (!response.ok) {
+      console.log(json.error);
+    }
+  }
+
+  useEffect(() => {
+    if (userInfo) {
+      getDailyProblems();
+    }
+  }, [userInfo]);
+
   const [popup, setPopup] = useState({ visible: false, message: '' });
   const today = new Date();
   const dayRefs = useRef([]);
@@ -45,36 +49,67 @@ const DailyChallenge = ({ onClick, userInfo }) => {
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
 
-  const generateMockProblems = useMemo(() => {
+  const parseSpecialDate = (specialDate) => {
+    if (!specialDate) return null;
+    
+    const match = specialDate.match(/^(\d{1,2})([a-z]+)(\d{4})$/i);
+    if (!match) return null;
+    
+    const [, day, monthStr, year] = match;
+    
+    const monthMap = {
+      'jan': 0, 'january': 0,
+      'feb': 1, 'february': 1,
+      'mar': 2, 'march': 2,
+      'apr': 3, 'april': 3,
+      'may': 4,
+      'jun': 5, 'june': 5,
+      'jul': 6, 'july': 6,
+      'aug': 7, 'august': 7,
+      'sep': 8, 'sept': 8, 'september': 8,
+      'oct': 9, 'october': 9,
+      'nov': 10, 'november': 10,
+      'dec': 11, 'december': 11
+    };
+    
+    const monthNum = monthMap[monthStr.toLowerCase()];
+    if (monthNum === undefined) return null;
+    
+    return new Date(parseInt(year), monthNum, parseInt(day));
+  };
+
+  const isProblemSolved = (problemId, date) => {
+    if (!userInfo?.solvedProblems) return false;
+    
+    return userInfo.solvedProblems.some(solved => solved.problemId === problemId);
+  };
+
+  const processedProblems = useMemo(() => {
     const problems = {};
-    const startDate = new Date(minDate);
-    const endDate = new Date(today);
     
-    let currentDate = new Date(startDate);
-    let problemIndex = 0;
-    
-    while (currentDate <= endDate) {
-      const dateKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${currentDate.getDate()}`;
-      const problem = mockProblems[problemIndex % mockProblems.length];
+    dailyProblems.forEach(problem => {
+      const problemDate = parseSpecialDate(problem.specialDate);
+      if (!problemDate) return;
       
-      const isPastDate = currentDate < today;
-      const isToday = currentDate.toDateString() === today.toDateString();
-      const solved = isPastDate ? Math.random() < 0.7 : false;
+      const dateKey = `${problemDate.getFullYear()}-${problemDate.getMonth()}-${problemDate.getDate()}`;
+      const isPastDate = problemDate < today;
+      const isToday = problemDate.toDateString() === today.toDateString();
+      const solved = isProblemSolved(problem.problemId, problemDate);
       
       problems[dateKey] = {
-        ...problem,
+        name: problem.problemName,
+        difficulty: problem.problemDifficulty,
+        problemId: problem.problemId,
         solved: solved,
         points: solved ? Math.floor(Math.random() * 50) + 10 : 0,
         isPastDate,
-        isToday
+        isToday,
+        date: problemDate
       };
-      
-      currentDate.setDate(currentDate.getDate() + 1);
-      problemIndex++;
-    }
+    });
     
     return problems;
-  }, []);
+  }, [dailyProblems, userInfo, today]);
 
   const canGoToPreviousMonth = () => {
     if (currentYear > minDate.getFullYear()) return true;
@@ -135,21 +170,24 @@ const DailyChallenge = ({ onClick, userInfo }) => {
       calendarDays.push(null);
     }
 
-    const calendarWeeks = [];
-    for (let i = 0; i < calendarDays.length; i += 7) {
-      calendarWeeks.push(calendarDays.slice(i, i + 7));
+    if (loading) {
+      return (
+        <div className="flex justify-center items-center py-20">
+          <div className="text-gray-400">Loading calendar data...</div>
+        </div>
+      );
     }
-    
+
     return (
       <div className="grid grid-cols-7 gap-1">
         {calendarDays.map((dayData, index) => {
           if (!dayData) {
-            return <div key={`empty-${index}`} className="aspect-[1.3] w-full"></div>;
+            return <div key={`empty-${index}`} className="aspect-[1.5] w-full"></div>;
           }
           
           const { year, month, day } = dayData;
           const dateKey = `${year}-${month}-${day}`;
-          const problem = generateMockProblems[dateKey];
+          const problem = processedProblems[dateKey];
           
           const isToday = 
             day === today.getDate() &&
@@ -164,20 +202,36 @@ const DailyChallenge = ({ onClick, userInfo }) => {
             return (
               <div
                 key={`${month}-${day}`}
-                className="relative group flex aspect-[1.3] w-full rounded-xl border font-medium border-gray-700 bg-gray-800 text-gray-500"
+                className="relative group flex aspect-[1.5] w-full rounded-xl border font-medium border-gray-700 bg-gray-800 text-gray-500"
               >
-                <span className="absolute left-1 top-1 flex items-center justify-center rounded-full text-base sm:text-lg lg:text-xl font-semibold">
+                <span className="absolute left-2 top-2 flex items-center justify-center rounded-full text-lg sm:text-xl lg:text-2xl font-semibold">
                   {day}
                 </span>
               </div>
             );
           }
+
+          if (!problem) {
+            return (
+              <div
+                key={`${month}-${day}`}
+                className="relative group flex aspect-[1.5] w-full rounded-xl border font-medium border-gray-700 bg-gray-800 text-gray-400"
+              >
+                <span className="absolute left-2 top-2 flex items-center justify-center rounded-full text-lg sm:text-xl lg:text-2xl font-semibold">
+                  {day}
+                </span>
+                <div className="flex-1 flex items-center justify-center text-sm font-medium">
+                  No Problem
+                </div>
+              </div>
+            );
+          }
           
           const getDifficultyColor = (difficulty) => {
-            switch (difficulty) {
-              case 'Easy': return 'text-green-400';
-              case 'Medium': return 'text-yellow-400';
-              case 'Hard': return 'text-red-400';
+            switch (difficulty?.toLowerCase()) {
+              case 'easy': return 'text-green-400';
+              case 'medium': return 'text-yellow-400';
+              case 'hard': return 'text-red-400';
               default: return 'text-gray-400';
             }
           };
@@ -185,7 +239,7 @@ const DailyChallenge = ({ onClick, userInfo }) => {
           return (
             <div
               key={`${month}-${day}`}
-              className={`relative group flex flex-col aspect-[1.3] w-full rounded-xl border font-medium transition-all hover:z-20 cursor-pointer ${
+              className={`relative group flex flex-col aspect-[1.5] w-full rounded-xl border font-medium transition-all hover:z-20 cursor-pointer ${
                 isToday 
                   ? 'bg-red-900 border-red-500 text-red-100 shadow-lg shadow-red-500/20 ring-2 ring-red-500/50'
                   : problem?.solved
@@ -194,43 +248,39 @@ const DailyChallenge = ({ onClick, userInfo }) => {
                   ? 'bg-gray-800 border-red-500/50 text-red-400'
                   : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-red-500/50'
               }`}
-              onClick={() => onClick && onClick(problem, dateKey)}
+              onClick={() => navigate(`/problems/${problem.problemId}`)}
             >
-              <span className="absolute left-1 top-1 flex items-center justify-center rounded-full text-base sm:text-lg lg:text-xl font-semibold">
+              <span className="absolute left-2 top-2 flex items-center justify-center rounded-full text-lg sm:text-xl lg:text-2xl font-semibold">
                 {day}
               </span>
               
-              {problem && (
-                <div className="mt-6 px-1 flex flex-col items-center justify-center text-center flex-1">
-                  <div className="text-xs font-medium truncate w-full px-1 mb-1" title={problem.name}>
-                    {problem.name}
-                  </div>
-                  <div className={`text-xs ${getDifficultyColor(problem.difficulty)} font-semibold mb-1`}>
-                    {problem.difficulty}
-                  </div>
-                  
-                  <div className="mt-1 flex items-center gap-1">
-                    {problem.solved ? (
-                      <>
-                        <span className="text-green-400 text-sm font-bold">SOLVED</span>
-                      </>
-                    ) : isPastDate ? (
-                      <span className="text-red-400 text-sm font-bold">FAILED</span>
-                    ) : isToday ? (
-                      <span className="text-red-300 text-xs font-bold">TODAY</span>
-                    ) : null}
-                  </div>
+              <div className="mt-8 px-2 flex flex-col items-center justify-center text-center flex-1">
+                <div className="text-sm font-medium truncate w-full px-1 mb-2" title={problem.name}>
+                  {problem.name}
                 </div>
-              )}
+                <div className={`text-sm ${getDifficultyColor(problem.difficulty)} font-semibold mb-2`}>
+                  {problem.difficulty}
+                </div>
+                
+                <div className="mt-1 flex items-center gap-1">
+                  {problem.solved ? (
+                    <span className="text-green-400 text-sm font-bold">SOLVED</span>
+                  ) : isPastDate ? (
+                    <span className="text-red-400 text-sm font-bold">FAILED</span>
+                  ) : isToday ? (
+                    <span className="text-red-300 text-sm font-bold">TODAY</span>
+                  ) : null}
+                </div>
+              </div>
             </div>
           );
         })}
       </div>
     );
-  }, [currentYear, currentMonth, generateMockProblems, onClick]);
+  }, [currentYear, currentMonth, processedProblems, onClick, loading]);
 
   return (
-    <div className="calendar-container max-h-full overflow-y-scroll rounded-t-2xl bg-gray-900 pb-10 text-white shadow-xl">
+    <div className="calendar-container max-h-full overflow-y-hidden rounded-t-2xl bg-gray-900 pb-10 text-white shadow-xl min-h-[calc(100vh-70px)]">
       {popup.visible && (
         <div className="absolute bottom-10 left-1/2 z-50 transform -translate-x-1/2 bg-red-600 text-white p-4 rounded-lg shadow-md">
           {popup.message}
@@ -282,10 +332,16 @@ const DailyChallenge = ({ onClick, userInfo }) => {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-gray-800 border border-gray-700 rounded"></div>
-              <span>Future</span>
+              <span>Future/No Problem</span>
             </div>
           </div>
         </div>
+        
+        {!loading && dailyProblems.length > 0 && (
+          <div className="mt-2 text-sm text-gray-500">
+            Showing {dailyProblems.length} daily problems
+          </div>
+        )}
       </div>
 
       <div className="grid px-5 sm:px-10 w-full grid-cols-7 text-center text-xs font-semibold uppercase text-gray-400 sm:text-sm border-b border-gray-800 pb-2 mt-4">

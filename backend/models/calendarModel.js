@@ -4,7 +4,7 @@ const CalendarSchema = new mongoose.Schema({
     problemId:{
         type: String,
         required: true,
-        unique: true
+        unique: false
     },
     problemName:{
         type: String,
