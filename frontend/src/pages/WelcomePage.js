@@ -150,7 +150,7 @@ const WelcomePage = ({userInfo}) => {
 
   if(location.pathname === "/" && user){
     return (
-      <HomePage/>
+      <HomePage userInfo={userInfo}/>
     )
   }
 

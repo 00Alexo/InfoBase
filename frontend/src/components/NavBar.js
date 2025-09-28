@@ -91,20 +91,16 @@ const NavBar = ({userInfo}) => {
               >
                 Community Problems
               </DropdownItem>
-              <DropdownItem
-                onClick={(() => navigate('/problems/list'))}
-                key="usage_metrics"
-              >
-                Oficial problems
-              </DropdownItem>
             </DropdownSection>
             <DropdownSection title = "Special">
               <DropdownItem
+                onClick={() => navigate('/problems/dailyChallenge')}
                 key="Oficial problems"
               >
                 Daily Challenge
               </DropdownItem>
               <DropdownItem
+                onClick={() => navigate('/problems/codeBattles')}
                 key="99_uptime"
               >
                 1v1 Battle

@@ -14,6 +14,8 @@ import ProblemList from './pages/ProblemList';
 import ProfilePage from './pages/ProfilePage';
 import { useGetProfile } from './Hooks/useGetProfile';
 import { useAuthContext } from './Hooks/useAuthContext';
+import CodeBattles from './pages/CodeBattles';
+import DailyChallenge from './pages/DailyChallenge';
 
 function AppContent() {
   const location = useLocation();
@@ -36,6 +38,8 @@ function AppContent() {
         <Route path = "/problems/createProblem" element={<CreateProblem/>}/>
         <Route path = "/problems/:uniqueId" element={<ProblemPage/>}/>
         <Route path = "/problems/list" element={<ProblemList/>}/>
+        <Route path = "/problems/codeBattles" element={<CodeBattles/>}/>
+        <Route path = "/problems/dailyChallenge" element={<DailyChallenge userInfo={profile}/>}/>
 
         <Route path = "/compiler" element={<Compiler/>}/>
       </Routes>
