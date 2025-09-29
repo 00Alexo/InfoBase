@@ -15,6 +15,7 @@ import ProfilePage from './pages/ProfilePage';
 import { useGetProfile } from './Hooks/useGetProfile';
 import { useAuthContext } from './Hooks/useAuthContext';
 import CodeBattles from './pages/CodeBattles';
+import BattlePage from './pages/BattlePage';
 import DailyChallenge from './pages/DailyChallenge';
 import LeaderBoard from './pages/Leaderboard';
 
@@ -41,6 +42,8 @@ function AppContent() {
         <Route path = "/problems/list" element={<ProblemList/>}/>
         <Route path = "/problems/codeBattles" element={<CodeBattles/>}/>
         <Route path = "/problems/dailyChallenge" element={<DailyChallenge userInfo={profile}/>}/>
+
+        <Route path = "/battle/:battleId" element={<BattlePage/>}/>
 
         <Route path = "/leaderboard" element={<LeaderBoard/>}/>
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { act } from "react";
 import {
   Navbar,
   NavbarBrand,
@@ -28,16 +28,14 @@ const NavBar = ({userInfo}) => {
   const navigate = useNavigate();
 
   const menuItems = [
-    "Profile",
-    "Dashboard",
-    "Activity",
-    "Analytics",
-    "System",
-    "Deployments",
-    "My Settings",
-    "Team Settings",
-    "Help & Feedback",
-    "Log Out",
+    { name: "Problems", action: () => navigate('/problems/list') },
+    { name: "Compiler", action: () => navigate('/compiler') },
+    { name: "Leaderboard", action: () => navigate('/leaderboard') },
+    { name: "Daily challenge", action: () => navigate('/problems/dailyChallenge') },
+    ...(user 
+      ? [{ name: "Profile", action: () => navigate('/profile') }]
+      : [{ name: "Sign Up", action: () => navigate('/signup') }]
+    ),
   ];
 
   return (
@@ -180,12 +178,6 @@ const NavBar = ({userInfo}) => {
                     >
                       Profile
                     </DropdownItem>
-                    <DropdownItem
-                      onClick={() => navigate(`profile/${user.username}`)}
-                      key="copy"
-                    >
-                      Settings
-                    </DropdownItem>
                   </DropdownSection>
                   <DropdownSection>
                     <DropdownItem
@@ -223,8 +215,9 @@ const NavBar = ({userInfo}) => {
       )}
       <NavbarMenu className="bg-gray-900/98 backdrop-blur-lg border-r border-red-500/20">
         {menuItems.map((item, index) => (
-          <NavbarMenuItem key={`${item}-${index}`}>
+          <NavbarMenuItem key={`${item.name}-${index}`}>
             <p
+              onClick={item.action}
               className={`w-full text-lg font-medium cursor-pointer transition-colors duration-200 ${
                 index === 2 
                   ? "text-red-400" 
@@ -233,7 +226,7 @@ const NavBar = ({userInfo}) => {
                     : "text-gray-300 hover:text-red-400"
               }`}
             >
-              {item}
+              {item.name}
             </p>
           </NavbarMenuItem>
         ))}

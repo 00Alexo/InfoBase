@@ -397,6 +397,7 @@ const getLeaderboard = async (req, res) => {
             const users = await userModel.find({}, {
                 username: 1,
                 profilePicture: 1,
+                ELO: 1,
                 _id: 1
             });
 
@@ -405,9 +406,9 @@ const getLeaderboard = async (req, res) => {
                     userId: user._id,
                     username: user.username,
                     avatar: user.profilePicture || null,
-                    eloScore: Math.floor(Math.random() * 1000) + 1200 
+                    ELO: user.ELO 
                 }))
-                .sort((a, b) => b.eloScore - a.eloScore)
+                .sort((a, b) => b.ELO - a.ELO)
                 .map((user, index) => ({
                     ...user,
                     rank: index + 1

@@ -169,9 +169,9 @@ const CreateProblem = () => {
                                         required
                                     >
                                         <option value="">Select difficulty</option>
-                                        <option value="Easy">🟢 Easy</option>
-                                        <option value="Medium">🟡 Medium</option>
-                                        <option value="Hard">🔴 Hard</option>
+                                        <option value="Easy"> Easy</option>
+                                        <option value="Medium"> Medium</option>
+                                        <option value="Hard"> Hard</option>
                                     </select>
                                 </div>
                             </div>
@@ -703,8 +703,8 @@ const CreateProblem = () => {
                         </div>
                     )}
                 </div>
-                <div className='flex flex-row justify-between border-t border-borderCustom pt-8'>
-                    <div>
+                <div className='flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-borderCustom pt-6 sm:pt-8'>
+                    <div className="order-2 sm:order-1">
                         {currentStep > 1 && (
                             <button
                                 type="button"
@@ -712,20 +712,20 @@ const CreateProblem = () => {
                                     setCurrentStep(prev => prev - 1);
                                     setShowStep2ValidationError(false);
                                 }}
-                                className="px-6 py-3 bg-bgCustomLight border border-borderCustom text-textCustomPrimary rounded-lg hover:bg-bgCustomCardHover transition-colors"
+                                className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-bgCustomLight border border-borderCustom text-textCustomPrimary rounded-lg hover:bg-bgCustomCardHover transition-colors text-sm sm:text-base"
                             >
                                 ← Previous
                             </button>
                         )}
                     </div>
                     
-                    <div className="text-center">
-                        <div className="text-sm text-textCustomMuted mb-2">
+                    <div className="order-1 sm:order-2 text-center">
+                        <div className="text-xs sm:text-sm text-textCustomMuted mb-2">
                             Step {currentStep} of {steps.length}
                         </div>
                     </div>
 
-                    <div>
+                    <div className="order-3 w-full sm:w-auto">
                         {currentStep < steps.length ? (
                             <button
                                 type="button"
@@ -742,7 +742,7 @@ const CreateProblem = () => {
                                         handleSubmit();
                                     }
                                 }}
-                                className="px-6 py-3 bg-primaryCustom hover:bg-primaryCustomHover disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                                className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-primaryCustom hover:bg-primaryCustomHover disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm sm:text-base font-medium"
                             >
                                 Next →
                             </button>
@@ -764,9 +764,9 @@ const CreateProblem = () => {
                                     handleSubmit();
                                 }}
                                 disabled={isLoading}
-                                className="px-8 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-colors min-w-[160px]"
+                                className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium sm:font-semibold transition-colors min-w-full sm:min-w-[160px] text-sm sm:text-base"
                             >
-                                {isLoading ? '⏳ Creating...' : '🚀 Create Problem'}
+                                {isLoading ? ' Creating...' : ' Create Problem'}
                             </button>
                         )}
                     </div>

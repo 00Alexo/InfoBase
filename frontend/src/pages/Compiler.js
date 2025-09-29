@@ -56,7 +56,7 @@ int main(){
 
 public class Main {
     public static void main(String[] args) {
-        // write your code here
+        System.out.println("Hello, World");
     }
 }`)
                 break;
@@ -299,7 +299,7 @@ int main(){
                 <div className="flex items-center gap-4">
                     <h1 className="text-xl font-bold text-white flex items-center gap-2">
                         <FaCloud className="text-red-400" />
-                        InfoBase Compiler
+                        Compiler
                     </h1>
                     <span className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded-full border border-red-500/30">
                         v2.0

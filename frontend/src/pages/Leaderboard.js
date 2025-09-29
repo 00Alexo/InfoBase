@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuthContext } from '../Hooks/useAuthContext';
+import {useNavigate} from 'react-router-dom'
 
 const Leaderboard = () => {
+  const navigate = useNavigate();
   const { user } = useAuthContext();
   const [activeTab, setActiveTab] = useState('total');
   const [leaderboardData, setLeaderboardData] = useState({
@@ -186,7 +188,7 @@ const Leaderboard = () => {
                     )}
                   </div>
 
-                  <div>
+                  <div onClick={() => navigate(`/profile/${entry.username}`)} className="flex flex-col cursor-pointer">
                     <button className={`text-left hover:text-red-400 transition-colors font-medium ${
                       isCurrentUser(entry.userId) ? 'text-red-400' : 'text-white'
                     }`}>
@@ -203,7 +205,7 @@ const Leaderboard = () => {
                     <div className={`text-lg font-bold ${
                       isCurrentUser(entry.userId) ? 'text-red-400' : 'text-white'
                     }`}>
-                      {activeTab === 'elo' ? entry.eloScore : entry.problemsSolved}
+                      {activeTab === 'elo' ? entry.ELO : entry.problemsSolved}
                     </div>
                     <div className="text-xs text-gray-400">
                       {activeTab === 'elo' ? 'ELO' : 'problems'}

@@ -179,10 +179,10 @@ const DailyChallenge = ({ onClick, userInfo }) => {
     }
 
     return (
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2">
         {calendarDays.map((dayData, index) => {
           if (!dayData) {
-            return <div key={`empty-${index}`} className="aspect-[1.5] w-full"></div>;
+            return <div key={`empty-${index}`} className="aspect-square sm:aspect-[1.3] lg:aspect-[1.5] w-full"></div>;
           }
           
           const { year, month, day } = dayData;
@@ -202,9 +202,9 @@ const DailyChallenge = ({ onClick, userInfo }) => {
             return (
               <div
                 key={`${month}-${day}`}
-                className="relative group flex aspect-[1.5] w-full rounded-xl border font-medium border-gray-700 bg-gray-800 text-gray-500"
+                className="relative group flex aspect-square sm:aspect-[1.3] lg:aspect-[1.5] w-full rounded-lg sm:rounded-xl border font-medium border-gray-700 bg-gray-800 text-gray-500"
               >
-                <span className="absolute left-2 top-2 flex items-center justify-center rounded-full text-lg sm:text-xl lg:text-2xl font-semibold">
+                <span className="absolute left-1 top-1 sm:left-2 sm:top-2 flex items-center justify-center rounded-full text-sm sm:text-lg lg:text-xl xl:text-2xl font-semibold">
                   {day}
                 </span>
               </div>
@@ -215,13 +215,14 @@ const DailyChallenge = ({ onClick, userInfo }) => {
             return (
               <div
                 key={`${month}-${day}`}
-                className="relative group flex aspect-[1.5] w-full rounded-xl border font-medium border-gray-700 bg-gray-800 text-gray-400"
+                className="relative group flex aspect-square sm:aspect-[1.3] lg:aspect-[1.5] w-full rounded-lg sm:rounded-xl border font-medium border-gray-700 bg-gray-800 text-gray-400"
               >
-                <span className="absolute left-2 top-2 flex items-center justify-center rounded-full text-lg sm:text-xl lg:text-2xl font-semibold">
+                <span className="absolute left-1 top-1 sm:left-2 sm:top-2 flex items-center justify-center rounded-full text-sm sm:text-lg lg:text-xl xl:text-2xl font-semibold">
                   {day}
                 </span>
-                <div className="flex-1 flex items-center justify-center text-sm font-medium">
-                  No Problem
+                <div className="flex-1 flex items-center justify-center text-xs sm:text-sm font-medium">
+                  <span className="hidden sm:inline">No Problem</span>
+                  <span className="sm:hidden">—</span>
                 </div>
               </div>
             );
@@ -239,9 +240,9 @@ const DailyChallenge = ({ onClick, userInfo }) => {
           return (
             <div
               key={`${month}-${day}`}
-              className={`relative group flex flex-col aspect-[1.5] w-full rounded-xl border font-medium transition-all hover:z-20 cursor-pointer ${
+              className={`relative group flex flex-col aspect-square sm:aspect-[1.3] lg:aspect-[1.5] w-full rounded-lg sm:rounded-xl border font-medium transition-all hover:z-20 cursor-pointer ${
                 isToday 
-                  ? 'bg-red-900 border-red-500 text-red-100 shadow-lg shadow-red-500/20 ring-2 ring-red-500/50'
+                  ? 'bg-red-900 border-red-500 text-red-100 shadow-lg shadow-red-500/20 ring-1 sm:ring-2 ring-red-500/50'
                   : problem?.solved
                   ? 'bg-gray-800 border-green-500/50 text-green-400'
                   : isPastDate 
@@ -250,25 +251,35 @@ const DailyChallenge = ({ onClick, userInfo }) => {
               }`}
               onClick={() => navigate(`/problems/${problem.problemId}`)}
             >
-              <span className="absolute left-2 top-2 flex items-center justify-center rounded-full text-lg sm:text-xl lg:text-2xl font-semibold">
+              <span className="absolute left-1 top-1 sm:left-2 sm:top-2 flex items-center justify-center rounded-full text-sm sm:text-lg lg:text-xl xl:text-2xl font-semibold">
                 {day}
               </span>
               
-              <div className="mt-8 px-2 flex flex-col items-center justify-center text-center flex-1">
-                <div className="text-sm font-medium truncate w-full px-1 mb-2" title={problem.name}>
-                  {problem.name}
+              <div className="mt-5 sm:mt-8 lg:mt-10 px-1 sm:px-2 flex flex-col items-center justify-center text-center flex-1">
+                <div className="text-xs sm:text-sm lg:text-base font-medium truncate w-full px-1 mb-1 sm:mb-2" title={problem.name}>
+                  <span className="hidden sm:inline">{problem.name}</span>
+                  <span className="sm:hidden">{problem.name.length > 8 ? `${problem.name.substring(0, 8)}...` : problem.name}</span>
                 </div>
-                <div className={`text-sm ${getDifficultyColor(problem.difficulty)} font-semibold mb-2`}>
-                  {problem.difficulty}
+                <div className={`text-xs sm:text-sm lg:text-base ${getDifficultyColor(problem.difficulty)} font-semibold mb-1 sm:mb-2`}>
+                  <span className="hidden sm:inline">{problem.difficulty}</span>
                 </div>
                 
                 <div className="mt-1 flex items-center gap-1">
                   {problem.solved ? (
-                    <span className="text-green-400 text-sm font-bold">SOLVED</span>
+                    <>
+                      <span className="hidden sm:inline text-green-400 text-xs sm:text-sm font-bold">SOLVED</span>
+                      <span className="sm:hidden text-green-400 text-xs">✓</span>
+                    </>
                   ) : isPastDate ? (
-                    <span className="text-red-400 text-sm font-bold">FAILED</span>
+                    <>
+                      <span className="hidden sm:inline text-red-400 text-xs sm:text-sm font-bold">FAILED</span>
+                      <span className="sm:hidden text-red-400 text-xs">✗</span>
+                    </>
                   ) : isToday ? (
-                    <span className="text-red-300 text-sm font-bold">TODAY</span>
+                    <>
+                      <span className="hidden sm:inline text-red-300 text-xs sm:text-sm font-bold">TODAY</span>
+                      <span className="sm:hidden text-red-300 text-xs">•</span>
+                    </>
                   ) : null}
                 </div>
               </div>
@@ -280,77 +291,82 @@ const DailyChallenge = ({ onClick, userInfo }) => {
   }, [currentYear, currentMonth, processedProblems, onClick, loading]);
 
   return (
-    <div className="calendar-container max-h-full overflow-y-hidden rounded-t-2xl bg-gray-900 pb-10 text-white shadow-xl min-h-[calc(100vh-70px)]">
+    <div className="calendar-container max-h-full overflow-y-auto rounded-t-2xl bg-gray-900 pb-10 text-white shadow-xl min-h-[calc(100vh-70px)]">
       {popup.visible && (
         <div className="absolute bottom-10 left-1/2 z-50 transform -translate-x-1/2 bg-red-600 text-white p-4 rounded-lg shadow-md">
           {popup.message}
         </div>
       )}
 
-      <div className="w-full rounded-t-2xl bg-gray-900 px-5 pt-7 pb-4 sm:px-10 sm:pt-8 border-b border-gray-700">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold text-white">
-            Daily Problems Calendar
-          </h2>
+      <div className="w-full rounded-t-2xl bg-gray-900 px-3 pt-4 pb-4 sm:px-5 sm:pt-7 lg:px-10 lg:pt-8 border-b border-gray-700">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-semibold text-white">
+              Daily Problems Calendar
+            </h2>
+          </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center gap-2 sm:gap-4">
             <button
               onClick={goToPreviousMonth}
               disabled={!canGoToPreviousMonth()}
-              className="px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 hover:bg-gray-700 hover:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-white font-medium"
+              className="px-3 py-2 sm:px-4 rounded-lg bg-gray-800 border border-gray-600 hover:bg-gray-700 hover:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-white font-medium text-sm sm:text-base"
             >
-              ← Prev
+              ← <span className="hidden sm:inline">Prev</span>
             </button>
             
-            <span className="text-lg font-medium min-w-[140px] text-center text-red-400">
+            <span className="text-base sm:text-lg font-medium min-w-[120px] sm:min-w-[140px] text-center text-red-400">
               {monthNames[currentMonth]} {currentYear}
             </span>
             
             <button
               onClick={goToNextMonth}
               disabled={!canGoToNextMonth()}
-              className="px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 hover:bg-gray-700 hover:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-white font-medium"
+              className="px-3 py-2 sm:px-4 rounded-lg bg-gray-800 border border-gray-600 hover:bg-gray-700 hover:border-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-white font-medium text-sm sm:text-base"
             >
-              Next →
+              <span className="hidden sm:inline">Next</span> →
             </button>
           </div>
         </div>
         
-        <div className="mt-4 text-sm text-gray-400">
-          <div className="flex flex-wrap gap-6">
+        <div className="mt-4 text-xs sm:text-sm text-gray-400">
+          <div className="flex flex-wrap gap-3 sm:gap-6">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-gray-800 border border-green-500/50 rounded"></div>
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gray-800 border border-green-500/50 rounded"></div>
               <span>Solved</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-gray-800 border border-red-500/50 rounded"></div>
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gray-800 border border-red-500/50 rounded"></div>
               <span>Failed</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-900 border border-red-500 rounded"></div>
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-red-900 border border-red-500 rounded"></div>
               <span>Today</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-gray-800 border border-gray-700 rounded"></div>
-              <span>Future/No Problem</span>
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gray-800 border border-gray-700 rounded"></div>
+              <span>Future</span>
             </div>
           </div>
         </div>
         
         {!loading && dailyProblems.length > 0 && (
-          <div className="mt-2 text-sm text-gray-500">
+          <div className="mt-2 text-xs sm:text-sm text-gray-500">
             Showing {dailyProblems.length} daily problems
           </div>
         )}
       </div>
 
-      <div className="grid px-5 sm:px-10 w-full grid-cols-7 text-center text-xs font-semibold uppercase text-gray-400 sm:text-sm border-b border-gray-800 pb-2 mt-4">
+      <div className="grid px-3 sm:px-5 lg:px-10 w-full grid-cols-7 text-center text-xs font-semibold uppercase text-gray-400 sm:text-sm border-b border-gray-800 pb-2 mt-4">
         {daysOfWeek.map((day) => (
-          <span key={day}>{day}</span>
+          <span key={day} className="py-1">
+            <span className="hidden sm:inline">{day}</span>
+            <span className="sm:hidden">{day.charAt(0)}</span>
+          </span>
         ))}
       </div>
       
-      <div className="mt-4 mx-5 sm:mx-10">
+      <div className="mt-2 sm:mt-4 mx-3 sm:mx-5 lg:mx-10">
         {generateCalendar}
       </div>
     </div>

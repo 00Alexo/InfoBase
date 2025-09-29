@@ -231,6 +231,11 @@ const UserSchema = new mongoose.Schema({
         enum: ['male', 'female', 'Unspecified'],
         default: 'Unspecified',
     },
+    ELO:{
+        type: Number,
+        default: 1000,
+        required: true
+    }
   }, {timestamps: true});
   
   const UserCollection = mongoose.model("UserCollection", UserSchema);

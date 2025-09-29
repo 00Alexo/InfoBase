@@ -9,13 +9,14 @@ const server = http.createServer(app);
 
 const { sendInput, terminateProcess } = require('./exec/executeFile');
 
-// Map to store socket connections by user/session
-const socketSessions = new Map(); // sessionId -> socketId  
-const userSockets = new Map(); // userId -> socket (includes anonymous users)
+const socketSessions = new Map(); 
+const userSockets = new Map();
 
 const userRoutes = require('./routes/userRoutes');
 const problemsRoutes = require('./routes/problemsRoutes');
 const compilerRoutes = require('./routes/compilerRoutes');
+const codeBattlesRoutes = require('./routes/codeBattlesRoutes');
+const { handleSocketEvents } = require('./controllers/codeBattlesController');
 
 const allowedOrigin = process.env.ALLOWED_ORIGIN;
 
@@ -51,6 +52,7 @@ app.use((req, res, next) =>{
 app.use('/api/user', userRoutes);
 app.use('/api/problems', problemsRoutes);
 app.use('/api/compiler', compilerRoutes);
+app.use('/api/battles', codeBattlesRoutes);
 
 mongoose.connect(process.env.mongoDB)
 .then(() => {
@@ -61,7 +63,7 @@ mongoose.connect(process.env.mongoDB)
 }); 
 
 io.on('connection', (socket) => {
-    console.log('Compiler connected:', socket.id);
+    console.log('Client connected:', socket.id);
 
     socket.on('associate-user', (data) => {
         const { userId } = data;
@@ -86,7 +88,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        console.log('Compiler disconnected:', socket.id);
+        console.log('Client disconnected:', socket.id);
         
         if (socket.userId) {
             userSockets.delete(socket.userId);
@@ -99,6 +101,8 @@ io.on('connection', (socket) => {
         }
     });
 });
+
+handleSocketEvents(io);
 
 server.listen(process.env.PORT || 4000, () => {
     console.log('Server listening on port', process.env.PORT || 4000);

@@ -280,9 +280,7 @@ const ProblemList = () => {
                                                             : "bg-bgCustomLight border border-gray-600 hover:border-red-500 text-gray-300"
                                                     }`}
                                                 >
-                                                    {difficulty === "Easy" && "🟢"} 
-                                                    {difficulty === "Medium" && "🟡"} 
-                                                    {difficulty === "Hard" && "🔴"} {difficulty}
+                                                    {difficulty}
                                                 </Button>
                                             ))}
                                         </div>
@@ -290,19 +288,21 @@ const ProblemList = () => {
 
                                     <div>
                                         <h4 className="text-sm font-medium text-gray-300 mb-3">Programming Topics</h4>
-                                        <div className="flex flex-wrap gap-1.5">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5">
                                             {availableTags.map(tag => (
                                                 <Button
                                                     key={tag}
                                                     size="sm"
                                                     onClick={() => toggleTag(tag)}
-                                                    className={`h-7 px-2 text-xs ${
+                                                    className={`h-8 px-2 text-xs text-left justify-start ${
                                                         selectedTags.includes(tag)
                                                             ? "bg-red-600 text-white"
                                                             : "bg-bgCustomLight border border-gray-600 hover:border-red-500 text-gray-300"
                                                     }`}
                                                 >
-                                                    {tag}
+                                                    <span className="truncate">
+                                                        {tag.length > 20 ? `${tag.substring(0, 20)}...` : tag}
+                                                    </span>
                                                 </Button>
                                             ))}
                                         </div>
@@ -344,7 +344,8 @@ const ProblemList = () => {
                     </div>
                 ) : (
                     <div className="space-y-3">
-                        <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-bgCustomCard/50 rounded-lg border border-gray-700/50 text-sm font-medium text-gray-400 uppercase tracking-wide">
+                        {/* Desktop Header - Hidden on mobile */}
+                        <div className="hidden lg:grid grid-cols-12 gap-4 px-4 py-3 bg-bgCustomCard/50 rounded-lg border border-gray-700/50 text-sm font-medium text-gray-400 uppercase tracking-wide">
                             <div className="col-span-1 text-center">#</div>
                             <div className="col-span-6">Title</div>
                             <div className="col-span-2">Difficulty</div>
@@ -357,7 +358,8 @@ const ProblemList = () => {
                                 to={`/problems/${problem.uniqueId}`}
                                 className="block"
                             >
-                                <div className="grid grid-cols-12 gap-4 px-4 py-4 bg-bgCustomCard hover:bg-bgCustomCard/80 rounded-lg border border-gray-700/30 hover:border-red-500/50 transition-all duration-200 group">
+                                {/* Desktop Layout */}
+                                <div className="hidden lg:grid grid-cols-12 gap-4 px-4 py-4 bg-bgCustomCard hover:bg-bgCustomCard/80 rounded-lg border border-gray-700/30 hover:border-red-500/50 transition-all duration-200 group">
                                     <div className="col-span-1 flex items-center justify-center">
                                         <span className="text-sm font-mono text-gray-400 group-hover:text-red-400">
                                             {problem.uniqueId}
@@ -383,13 +385,6 @@ const ProblemList = () => {
                                         <Chip
                                             size="sm"
                                             className={`${getDifficultyColor(problem.difficulty)} font-medium`}
-                                            startContent={
-                                                <span className="text-xs">
-                                                    {problem.difficulty === "Easy" && "🟢"} 
-                                                    {problem.difficulty === "Medium" && "🟡"} 
-                                                    {problem.difficulty === "Hard" && "🔴"}
-                                                </span>
-                                            }
                                         >
                                             {problem.difficulty}
                                         </Chip>
@@ -397,7 +392,7 @@ const ProblemList = () => {
 
                                     <div className="col-span-3 flex items-center">
                                         <div className="flex flex-wrap gap-1 w-full">
-                                            {problem.tags && problem.tags.map((tag, tagIndex) => (
+                                            {problem.tags && problem.tags.slice(0, 3).map((tag, tagIndex) => (
                                                 <Chip
                                                     key={tagIndex}
                                                     size="sm"
@@ -410,20 +405,79 @@ const ProblemList = () => {
                                                     {tag.name}
                                                 </Chip>
                                             ))}
+                                            {problem.tags && problem.tags.length > 3 && (
+                                                <Chip size="sm" className="bg-gray-900/20 text-gray-400 border border-gray-500/30 text-xs">
+                                                    +{problem.tags.length - 3}
+                                                </Chip>
+                                            )}
                                         </div>
                                     </div>
+                                </div>
+
+                                {/* Mobile Layout */}
+                                <div className="lg:hidden px-4 py-4 bg-bgCustomCard hover:bg-bgCustomCard/80 rounded-lg border border-gray-700/30 hover:border-red-500/50 transition-all duration-200 group">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="flex-1 min-w-0 mr-3">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="text-xs font-mono text-gray-400 group-hover:text-red-400 px-2 py-1 bg-gray-800 rounded">
+                                                    #{problem.uniqueId}
+                                                </span>
+                                                {problem.official && (
+                                                    <Chip size="sm" className="bg-blue-900/20 text-blue-400 border border-blue-500/30 text-xs">
+                                                        Official
+                                                    </Chip>
+                                                )}
+                                            </div>
+                                            <h3 className="text-white font-medium group-hover:text-red-400 transition-colors text-sm leading-tight">
+                                                {problem.title}
+                                            </h3>
+                                        </div>
+                                        <Chip
+                                            size="sm"
+                                            className={`${getDifficultyColor(problem.difficulty)} font-medium text-xs flex-shrink-0`}
+                                        >
+                                            {problem.difficulty}
+                                        </Chip>
+                                    </div>
+                                    
+                                    <p className="text-sm text-gray-400 mb-3 line-clamp-2">
+                                        {problem.description}
+                                    </p>
+                                    
+                                    {problem.tags && problem.tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1">
+                                            {problem.tags.slice(0, 2).map((tag, tagIndex) => (
+                                                <Chip
+                                                    key={tagIndex}
+                                                    size="sm"
+                                                    className={`text-xs ${
+                                                        tag.class 
+                                                            ? "bg-green-900/20 text-green-400 border border-green-500/30" 
+                                                            : "bg-red-900/20 text-red-400 border border-red-500/30"
+                                                    }`}
+                                                >
+                                                    {tag.name.length > 15 ? `${tag.name.substring(0, 15)}...` : tag.name}
+                                                </Chip>
+                                            ))}
+                                            {problem.tags.length > 2 && (
+                                                <Chip size="sm" className="bg-gray-900/20 text-gray-400 border border-gray-500/30 text-xs">
+                                                    +{problem.tags.length - 2} more
+                                                </Chip>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </Link>
                         ))}
 
                         {/* Pagination */}
                         {totalPages > 1 && (
-                            <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-                                <div className="text-sm text-gray-400">
+                            <div className="mt-8 flex flex-col items-center gap-4">
+                                <div className="text-sm text-gray-400 text-center">
                                     Page {currentPage} of {totalPages} • {totalProblems} total problems
                                 </div>
                                 
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap justify-center">
                                     <Button
                                         size="sm"
                                         onClick={() => handlePageChange(currentPage - 1)}
@@ -431,14 +485,15 @@ const ProblemList = () => {
                                         className="bg-bgCustomLight border border-gray-600 hover:border-red-500/50 text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                         startContent={<FaChevronLeft className="text-xs" />}
                                     >
-                                        Previous
+                                        <span className="hidden sm:inline">Previous</span>
+                                        <span className="sm:hidden">Prev</span>
                                     </Button>
                                     
-                                    <div className="flex items-center gap-1">
+                                    <div className="flex items-center gap-1 max-w-full overflow-x-auto">
                                         {/* Show page numbers */}
                                         {(() => {
                                             const pages = [];
-                                            const showPages = 5; // Show 5 page numbers max
+                                            const showPages = window.innerWidth < 640 ? 3 : 5; // Show fewer pages on mobile
                                             let startPage = Math.max(1, currentPage - Math.floor(showPages / 2));
                                             let endPage = Math.min(totalPages, startPage + showPages - 1);
                                             
@@ -454,14 +509,14 @@ const ProblemList = () => {
                                                         key={1}
                                                         size="sm"
                                                         onClick={() => handlePageChange(1)}
-                                                        className="min-w-10 h-8 bg-bgCustomLight border border-gray-600 hover:border-red-500/50 text-gray-300"
+                                                        className="min-w-8 h-8 bg-bgCustomLight border border-gray-600 hover:border-red-500/50 text-gray-300 text-xs"
                                                     >
                                                         1
                                                     </Button>
                                                 );
                                                 if (startPage > 2) {
                                                     pages.push(
-                                                        <span key="ellipsis-start" className="text-gray-400 px-2">
+                                                        <span key="ellipsis-start" className="text-gray-400 px-1 text-xs">
                                                             ...
                                                         </span>
                                                     );
@@ -475,7 +530,7 @@ const ProblemList = () => {
                                                         key={i}
                                                         size="sm"
                                                         onClick={() => handlePageChange(i)}
-                                                        className={`min-w-10 h-8 ${
+                                                        className={`min-w-8 h-8 text-xs ${
                                                             i === currentPage
                                                                 ? "bg-red-600 text-white"
                                                                 : "bg-bgCustomLight border border-gray-600 hover:border-red-500/50 text-gray-300"
@@ -490,7 +545,7 @@ const ProblemList = () => {
                                             if (endPage < totalPages) {
                                                 if (endPage < totalPages - 1) {
                                                     pages.push(
-                                                        <span key="ellipsis-end" className="text-gray-400 px-2">
+                                                        <span key="ellipsis-end" className="text-gray-400 px-1 text-xs">
                                                             ...
                                                         </span>
                                                     );
@@ -500,7 +555,7 @@ const ProblemList = () => {
                                                         key={totalPages}
                                                         size="sm"
                                                         onClick={() => handlePageChange(totalPages)}
-                                                        className="min-w-10 h-8 bg-bgCustomLight border border-gray-600 hover:border-red-500/50 text-gray-300"
+                                                        className="min-w-8 h-8 bg-bgCustomLight border border-gray-600 hover:border-red-500/50 text-gray-300 text-xs"
                                                     >
                                                         {totalPages}
                                                     </Button>
@@ -518,7 +573,8 @@ const ProblemList = () => {
                                         className="bg-bgCustomLight border border-gray-600 hover:border-red-500/50 text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                                         endContent={<FaChevronRight className="text-xs" />}
                                     >
-                                        Next
+                                        <span className="hidden sm:inline">Next</span>
+                                        <span className="sm:hidden">Next</span>
                                     </Button>
                                 </div>
                             </div>

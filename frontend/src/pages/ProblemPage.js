@@ -461,22 +461,22 @@ int main(){
     }
 
     return (
-        <div className="flex flex-row p-2 gap-2">
-            <div className="w-1/2 bg-[#262626] text-white min-h-[calc(100vh-81px)] rounded-lg border-1 border-[#333333]">
-                <div className="bg-[#333333] p-2 rounded-t-lg flex flex-row gap-1">
-                    <div className={`flex flex-row gap-2 items-center px-3 py-2 rounded cursor-pointer transition-all duration-200 hover:bg-[#404040] ${
+        <div className="flex flex-col max-lg:p-1 max-sm:p-2 lg:flex-row lg:p-2 max-lg:gap-1 max-sm:gap-2 lg:gap-2">
+            <div className="w-full max-lg:h-[50vh] lg:w-1/2 bg-[#262626] text-white lg:min-h-[calc(100vh-81px)] rounded-lg border-1 border-[#333333]">
+                <div className="bg-[#333333] max-lg:p-1 max-sm:p-2 lg:p-2 rounded-t-lg flex flex-row max-lg:gap-1 lg:gap-1 max-lg:overflow-x-auto">
+                    <div className={`flex flex-row max-lg:gap-1 max-sm:gap-2 lg:gap-2 items-center max-lg:px-2 max-sm:px-3 lg:px-3 max-lg:py-1 max-sm:py-2 lg:py-2 rounded cursor-pointer transition-all duration-200 hover:bg-[#404040] max-lg:whitespace-nowrap ${
                         activePage === 'description' 
                             ? 'bg-[#404040] border-b-2 border-blue-500 text-blue-400' 
                             : 'text-gray-300 hover:text-white'
                     }`}
                         onClick={() => setActivePage('description')}
                     >
-                        <FaBook className={`text-lg ${
+                        <FaBook className={`max-lg:text-sm max-sm:text-lg lg:text-lg ${
                             activePage === 'description' ? 'text-blue-400' : 'text-orange-400'
                         }`}/>
-                        <span className="font-medium">Description</span>
+                        <span className="font-medium max-lg:text-sm max-sm:text-base lg:text-base">Description</span>
                     </div>
-                    <div className={`flex flex-row gap-2 items-center px-3 py-2 rounded cursor-pointer transition-all duration-200 hover:bg-[#404040] ${
+                    <div className={`flex flex-row max-lg:gap-1 max-sm:gap-2 lg:gap-2 items-center max-lg:px-2 max-sm:px-3 lg:px-3 max-lg:py-1 max-sm:py-2 lg:py-2 rounded cursor-pointer transition-all duration-200 hover:bg-[#404040] max-lg:whitespace-nowrap ${
                         activePage === 'solutions' 
                             ? 'bg-[#404040] border-b-2 border-green-500 text-green-400' 
                             : 'text-gray-300 hover:text-white'
@@ -487,12 +487,12 @@ int main(){
                             getSolutions(1);
                         }}
                     >
-                        <FaQuestion className={`text-lg ${
+                        <FaQuestion className={`max-lg:text-sm max-sm:text-lg lg:text-lg ${
                             activePage === 'solutions' ? 'text-green-400' : 'text-purple-400'
                         }`}/>
-                        <span className="font-medium">Solutions</span>
+                        <span className="font-medium max-lg:text-sm max-sm:text-base lg:text-base">Solutions</span>
                     </div>
-                    <div className={`flex flex-row gap-2 items-center px-3 py-2 rounded cursor-pointer transition-all duration-200 hover:bg-[#404040] ${
+                    <div className={`flex flex-row max-lg:gap-1 max-sm:gap-2 lg:gap-2 items-center max-lg:px-2 max-sm:px-3 lg:px-3 max-lg:py-1 max-sm:py-2 lg:py-2 rounded cursor-pointer transition-all duration-200 hover:bg-[#404040] max-lg:whitespace-nowrap ${
                         activePage === 'submissions' 
                             ? 'bg-[#404040] border-b-2 border-yellow-500 text-yellow-400' 
                             : 'text-gray-300 hover:text-white'
@@ -502,24 +502,24 @@ int main(){
                             getSubmissions();
                         }}
                     >
-                        <FaCheckCircle className={`text-lg ${
+                        <FaCheckCircle className={`max-lg:text-sm max-sm:text-lg lg:text-lg ${
                             activePage === 'submissions' ? 'text-yellow-400' : 'text-emerald-400'
                         }`}/>
-                        <span className="font-medium">Submissions</span>
+                        <span className="font-medium max-lg:text-sm max-sm:text-base lg:text-base">Submissions</span>
                     </div>
                 </div>
-                <div className="p-4 overflow-y-auto max-h-[calc(100vh-150px)]">
+                <div className="max-lg:p-2 max-sm:p-4 lg:p-4 overflow-y-auto max-lg:h-[calc(50vh-60px)] lg:max-h-[calc(100vh-150px)]">
                     {activePage === 'description' && problem ? (
-                        <div className="space-y-6">
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <h1 className="text-2xl font-bold text-white">{problem.title}</h1>
-                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getDifficultyColor(problem.difficulty)}`}>
+                        <div className="max-lg:space-y-4 max-sm:space-y-6 lg:space-y-6">
+                            <div className="max-lg:space-y-3 max-sm:space-y-4 lg:space-y-4">
+                                <div className="flex max-lg:flex-col max-sm:flex-row max-lg:items-start max-sm:items-center lg:items-center max-lg:justify-start max-sm:justify-between lg:justify-between max-lg:gap-2 lg:gap-0">
+                                    <h1 className="max-lg:text-xl max-sm:text-2xl lg:text-2xl font-bold text-white">{problem.title}</h1>
+                                    <span className={`px-2 max-sm:px-3 lg:px-3 py-1 rounded-full text-xs font-medium max-lg:self-start lg:self-auto ${getDifficultyColor(problem.difficulty)}`}>
                                         {problem.difficulty}
                                     </span>
                                 </div>
                                 
-                                <div className="flex flex-wrap gap-3 text-sm text-gray-400">
+                                <div className="flex flex-wrap max-lg:gap-2 max-sm:gap-3 lg:gap-3 max-lg:text-xs max-sm:text-sm lg:text-sm text-gray-400">
                                     <div className="flex items-center gap-1 cursor-pointer" 
                                     onClick={() => navigate(`/profile/${problem.creator}`)}>
                                         <FaUser />
@@ -538,7 +538,7 @@ int main(){
                                 </div>
 
                                 {problem.tags && problem.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="flex flex-wrap max-lg:gap-1 max-sm:gap-2 lg:gap-2">
                                         {problem.tags.map((tag, index) => (
                                             <span key={index} className={` ${tag.class ? 'bg-green-600 border-green-600' : 'bg-primaryCustom border-primaryCustom'}
                                             border px-2 py-1 rounded text-xs flex items-center gap-1`}>
@@ -550,68 +550,68 @@ int main(){
                                 )}
                             </div>
 
-                            <div className="space-y-4">
-                                <h2 className="text-lg font-semibold text-white border-b border-gray-600 pb-2">Descriere</h2>
-                                <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{problem.description}</p>
+                            <div className="max-lg:space-y-3 max-sm:space-y-4 lg:space-y-4">
+                                <h2 className="max-lg:text-base max-sm:text-lg lg:text-lg font-semibold text-white border-b border-gray-600 pb-2">Descriere</h2>
+                                <p className="max-lg:text-sm max-sm:text-base lg:text-base text-gray-300 leading-relaxed whitespace-pre-wrap">{problem.description}</p>
                             </div>
 
-                            <div className="space-y-4">
-                                <h2 className="text-lg font-semibold text-white border-b border-gray-600 pb-2">Cerința</h2>
-                                <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{problem.cerinta}</p>
+                            <div className="max-lg:space-y-3 max-sm:space-y-4 lg:space-y-4">
+                                <h2 className="max-lg:text-base max-sm:text-lg lg:text-lg font-semibold text-white border-b border-gray-600 pb-2">Cerința</h2>
+                                <p className="max-lg:text-sm max-sm:text-base lg:text-base text-gray-300 leading-relaxed whitespace-pre-wrap">{problem.cerinta}</p>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 max-lg:grid-cols-1 lg:grid-cols-2 max-lg:gap-3 max-sm:gap-4 lg:gap-4">
                                 <div className="space-y-2">
-                                    <h3 className="text-md font-semibold text-white">Date de intrare</h3>
-                                    <div className="bg-[#1a1a1a] p-3 rounded border border-gray-700">
-                                        <p className="text-gray-300 text-sm whitespace-pre-wrap">{problem.DateDeIntrare}</p>
+                                    <h3 className="max-lg:text-sm max-sm:text-md lg:text-md font-semibold text-white">Date de intrare</h3>
+                                    <div className="bg-[#1a1a1a] max-lg:p-2 max-sm:p-3 lg:p-3 rounded border border-gray-700">
+                                        <p className="max-lg:text-xs max-sm:text-sm lg:text-sm text-gray-300 whitespace-pre-wrap">{problem.DateDeIntrare}</p>
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="text-md font-semibold text-white">Date de ieșire</h3>
-                                    <div className="bg-[#1a1a1a] p-3 rounded border border-gray-700">
-                                        <p className="text-gray-300 text-sm whitespace-pre-wrap">{problem.DateDeIesire}</p>
+                                    <h3 className="max-lg:text-sm max-sm:text-md lg:text-md font-semibold text-white">Date de ieșire</h3>
+                                    <div className="bg-[#1a1a1a] max-lg:p-2 max-sm:p-3 lg:p-3 rounded border border-gray-700">
+                                        <p className="max-lg:text-xs max-sm:text-sm lg:text-sm text-gray-300 whitespace-pre-wrap">{problem.DateDeIesire}</p>
                                     </div>
                                 </div>
                             </div>
 
                             {problem.Restrictii && (
-                                <div className="space-y-4">
-                                    <h2 className="text-lg font-semibold text-white border-b border-gray-600 pb-2">Restricții</h2>
-                                    <div className="bg-[#1a1a1a] p-3 rounded border border-gray-700">
-                                        <p className="text-gray-300 text-sm whitespace-pre-wrap">{problem.Restrictii}</p>
+                                <div className="max-lg:space-y-3 max-sm:space-y-4 lg:space-y-4">
+                                    <h2 className="max-lg:text-base max-sm:text-lg lg:text-lg font-semibold text-white border-b border-gray-600 pb-2">Restricții</h2>
+                                    <div className="bg-[#1a1a1a] max-lg:p-2 max-sm:p-3 lg:p-3 rounded border border-gray-700">
+                                        <p className="max-lg:text-xs max-sm:text-sm lg:text-sm text-gray-300 whitespace-pre-wrap">{problem.Restrictii}</p>
                                     </div>
                                 </div>
                             )}
 
                             {problem.Precizari && (
-                                <div className="space-y-4">
-                                    <h2 className="text-lg font-semibold text-white border-b border-gray-600 pb-2">Precizări</h2>
-                                    <div className="bg-[#1a1a1a] p-3 rounded border border-gray-700">
-                                        <p className="text-gray-300 text-sm whitespace-pre-wrap">{problem.Precizari}</p>
+                                <div className="max-lg:space-y-3 max-sm:space-y-4 lg:space-y-4">
+                                    <h2 className="max-lg:text-base max-sm:text-lg lg:text-lg font-semibold text-white border-b border-gray-600 pb-2">Precizări</h2>
+                                    <div className="bg-[#1a1a1a] max-lg:p-2 max-sm:p-3 lg:p-3 rounded border border-gray-700">
+                                        <p className="max-lg:text-xs max-sm:text-sm lg:text-sm text-gray-300 whitespace-pre-wrap">{problem.Precizari}</p>
                                     </div>
                                 </div>
                             )}
 
                             {problem.Exemple && problem.Exemple.length > 0 && (
-                                <div className="space-y-4">
-                                    <h2 className="text-lg font-semibold text-white border-b border-gray-600 pb-2">Exemple</h2>
+                                <div className="max-lg:space-y-3 max-sm:space-y-4 lg:space-y-4">
+                                    <h2 className="max-lg:text-base max-sm:text-lg lg:text-lg font-semibold text-white border-b border-gray-600 pb-2">Exemple</h2>
                                     {problem.Exemple.map((example, index) => (
-                                        <div key={index} className="space-y-3">
-                                            <h4 className="text-md font-medium text-gray-300">Exemplul {index + 1}</h4>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div key={index} className="max-lg:space-y-2 max-sm:space-y-3 lg:space-y-3">
+                                            <h4 className="max-lg:text-sm max-sm:text-md lg:text-md font-medium text-gray-300">Exemplul {index + 1}</h4>
+                                            <div className="grid grid-cols-1 max-lg:grid-cols-1 lg:grid-cols-2 max-lg:gap-3 max-sm:gap-4 lg:gap-4">
                                                 <div>
-                                                    <h5 className="text-sm font-medium text-gray-400 mb-2">Input:</h5>
-                                                    <div className="bg-[#1a1a1a] p-3 rounded border border-gray-700">
-                                                        <pre className="text-green-400 text-sm whitespace-pre-wrap font-mono">
+                                                    <h5 className="max-lg:text-xs max-sm:text-sm lg:text-sm font-medium text-gray-400 mb-2">Input:</h5>
+                                                    <div className="bg-[#1a1a1a] max-lg:p-2 max-sm:p-3 lg:p-3 rounded border border-gray-700">
+                                                        <pre className="text-green-400 max-lg:text-xs max-sm:text-sm lg:text-sm whitespace-pre-wrap font-mono overflow-x-auto">
                                                             {example.input || example.intrare}
                                                         </pre>
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <h5 className="text-sm font-medium text-gray-400 mb-2">Output:</h5>
-                                                    <div className="bg-[#1a1a1a] p-3 rounded border border-gray-700">
-                                                        <pre className="text-blue-400 text-sm whitespace-pre-wrap font-mono">
+                                                    <h5 className="max-lg:text-xs max-sm:text-sm lg:text-sm font-medium text-gray-400 mb-2">Output:</h5>
+                                                    <div className="bg-[#1a1a1a] max-lg:p-2 max-sm:p-3 lg:p-3 rounded border border-gray-700">
+                                                        <pre className="text-blue-400 max-lg:text-xs max-sm:text-sm lg:text-sm whitespace-pre-wrap font-mono overflow-x-auto">
                                                             {example.output || example.iesire}
                                                         </pre>
                                                     </div>
@@ -619,9 +619,9 @@ int main(){
                                             </div>
                                             {example.explanation && (
                                                 <div>
-                                                    <h5 className="text-sm font-medium text-gray-400 mb-2">Explicație:</h5>
-                                                    <div className="bg-[#1a1a1a] p-3 rounded border border-gray-700">
-                                                        <p className="text-gray-300 text-sm whitespace-pre-wrap">{example.explanation}</p>
+                                                    <h5 className="max-lg:text-xs max-sm:text-sm lg:text-sm font-medium text-gray-400 mb-2">Explicație:</h5>
+                                                    <div className="bg-[#1a1a1a] max-lg:p-2 max-sm:p-3 lg:p-3 rounded border border-gray-700">
+                                                        <p className="max-lg:text-xs max-sm:text-sm lg:text-sm text-gray-300 whitespace-pre-wrap">{example.explanation}</p>
                                                     </div>
                                                 </div>
                                             )}
@@ -836,14 +836,14 @@ int main(){
                     ) : null}
                 </div>
             </div>
-            <div className="w-1/2 bg-[#262626] text-white h-[calc(100vh-81px)] rounded-lg border-1 border-[#333333] flex flex-col">
-                <div className="p-2 bg-[#333333] rounded-t-lg flex-shrink-0 relative flex flex-row justify-between">
+            <div className="w-full max-lg:h-[50vh] lg:w-1/2 bg-[#262626] text-white lg:h-[calc(100vh-81px)] rounded-lg border-1 border-[#333333] flex flex-col">
+                <div className="max-lg:p-1 max-sm:p-2 lg:p-2 bg-[#333333] rounded-t-lg flex-shrink-0 relative flex max-lg:flex-col max-sm:flex-row lg:flex-row max-lg:justify-between lg:justify-between max-lg:gap-2 lg:gap-0">
                     <div>
                         <Dropdown placement="bottom-start">
                             <DropdownTrigger>
                                 <Button 
                                     variant="light" 
-                                    className="text-gray-300 hover:bg-[#404040] p-2 min-w-0"
+                                    className="text-gray-300 hover:bg-[#404040] max-lg:p-1 max-sm:p-2 lg:p-2 min-w-0 max-lg:text-sm lg:text-base"
                                 >
                                     {language} <FaChevronDown size="0.75em"/>
                                 </Button>
@@ -858,14 +858,14 @@ int main(){
                             </DropdownMenu>
                         </Dropdown>
                     </div>
-                    <div className="flex flex-row gap-1">
+                    <div className="flex flex-row max-lg:gap-1 lg:gap-1">
                         {isRunning ? (
                             <>
                                 <Button
                                     onClick={terminateProgram}
                                     variant="ghost"
-                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 flex 
-                                    items-center justify-center transition-colors duration-200 min-w-0"
+                                    className="bg-red-600 hover:bg-red-700 text-white max-lg:px-2 max-sm:px-3 lg:px-3 max-lg:py-1 max-sm:py-1.5 lg:py-1.5 flex 
+                                    items-center justify-center transition-colors duration-200 min-w-0 max-lg:text-sm lg:text-base"
                                 >
                                     <FaStop size="0.8em" />
                                 </Button>
@@ -875,8 +875,8 @@ int main(){
                                 onClick={handleRunCode}
                                 disabled={isCompiling}
                                 variant="ghost"
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 flex 
-                                items-center justify-center transition-colors duration-200 min-w-0 disabled:bg-gray-500"
+                                className="bg-blue-600 hover:bg-blue-700 text-white max-lg:px-2 max-sm:px-3 lg:px-3 max-lg:py-1 max-sm:py-1.5 lg:py-1.5 flex 
+                                items-center justify-center transition-colors duration-200 min-w-0 disabled:bg-gray-500 max-lg:text-sm lg:text-base"
                             >
                                 <FaPlay size="0.8em" />
                             </Button>
@@ -885,16 +885,16 @@ int main(){
                             onClick={handleSubmitCode}
                             disabled={isCompiling || isRunning || isSubmitting}
                             variant="ghost"
-                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 flex items-center gap-2 transition-colors duration-200 disabled:bg-gray-500"
+                            className="bg-green-600 hover:bg-green-700 text-white max-lg:px-2 max-sm:px-4 lg:px-4 max-lg:py-1 max-sm:py-2 lg:py-2 flex items-center max-lg:gap-1 max-sm:gap-2 lg:gap-2 transition-colors duration-200 disabled:bg-gray-500 max-lg:text-sm lg:text-base"
                         >
                             <FaCloud size="0.9em" />
-                            <span className="font-medium">
+                            <span className="font-medium max-lg:hidden max-sm:inline lg:inline">
                                 {isSubmitting ? 'Submitting...' : 'Submit'}
                             </span>
                         </Button>
                     </div>
                 </div>
-                <div className="flex-1 overflow-hidden relative">
+                <div className="flex-1 overflow-hidden relative min-h-0">
                     <CodeMirror
                         value={value} 
                         height="calc(100vh - 81px - 60px - 203px)"
@@ -921,14 +921,14 @@ int main(){
                         </div>
                     )}
                 </div>
-                <div className="h-52 bg-[#151515] rounded-b-lg border-t-2 border-[#30363d] flex-shrink-0 flex flex-col">
-                    <div className="flex justify-between items-center p-2 border-b border-[#30363d]">
-                        <span className="text-gray-300 font-medium">Console</span>
+                <div className="max-lg:h-32 max-sm:h-52 lg:h-52 bg-[#151515] rounded-b-lg border-t-2 border-[#30363d] flex-shrink-0 flex flex-col">
+                    <div className="flex justify-between items-center max-lg:p-1 max-sm:p-2 lg:p-2 border-b border-[#30363d]">
+                        <span className="text-gray-300 font-medium max-lg:text-sm lg:text-base">Console</span>
                         <span
                             onClick={clearOutput}
                             variant="ghost"
-                            className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-0.5 flex rounded-lg cursor-pointer
-                            items-center justify-center transition-colors duration-200 min-w-0"
+                            className="bg-gray-600 hover:bg-gray-700 text-white max-lg:px-2 max-sm:px-3 lg:px-3 py-0.5 flex rounded-lg cursor-pointer
+                            items-center justify-center transition-colors duration-200 min-w-0 max-lg:text-sm lg:text-base"
                         >
                             Clear
                         </span>
@@ -939,7 +939,7 @@ int main(){
                     >
                         <div
                             ref={outputRef}
-                            className="absolute inset-0 p-2 text-green-400 font-mono text-sm overflow-auto whitespace-pre-wrap outline-none"
+                            className="absolute inset-0 max-lg:p-1 max-sm:p-2 lg:p-2 text-green-400 font-mono max-lg:text-xs max-sm:text-sm lg:text-sm overflow-auto whitespace-pre-wrap outline-none"
                             tabIndex={waitingForInput ? 0 : -1}
                             onKeyDown={handleTerminalKeyDown}
                         >
@@ -947,7 +947,7 @@ int main(){
                             {waitingForInput && (
                                 <span className="inline-flex items-baseline">
                                     <span className="text-green-400">{currentInput}</span>
-                                    <span className="animate-pulse bg-green-400 w-0.5 h-4 ml-0.5 inline-block">█</span>
+                                    <span className="animate-pulse bg-green-400 w-0.5 max-lg:h-3 max-sm:h-4 lg:h-4 ml-0.5 inline-block">█</span>
                                 </span>
                             )}
                         </div>
@@ -955,48 +955,48 @@ int main(){
                 </div>
             </div>
             {showSubmitResults && submitResults && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-[#262626] text-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
-                        <div className="p-4 border-b border-gray-600 flex justify-between items-center">
-                            <h2 className="text-xl font-bold">Submission Results</h2>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 max-lg:p-2 max-sm:p-4 lg:p-4">
+                    <div className="bg-[#262626] text-white rounded-lg max-w-4xl w-full max-lg:max-h-[95vh] max-sm:max-h-[90vh] lg:max-h-[90vh] overflow-hidden">
+                        <div className="max-lg:p-3 max-sm:p-4 lg:p-4 border-b border-gray-600 flex justify-between items-center">
+                            <h2 className="max-lg:text-lg max-sm:text-xl lg:text-xl font-bold">Submission Results</h2>
                             <button
                                 onClick={() => setShowSubmitResults(false)}
-                                className="text-gray-400 hover:text-white text-xl"
+                                className="text-gray-400 hover:text-white text-xl min-w-8 min-h-8 flex items-center justify-center"
                             >
                                 ×
                             </button>
                         </div>
                         
-                        <div className="p-4 overflow-y-auto max-h-[calc(90vh-120px)]">
-                            <div className="mb-6 p-4 bg-[#1a1a1a] rounded border border-gray-700">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center justify-items-center">
+                        <div className="max-lg:p-3 max-sm:p-4 lg:p-4 overflow-y-auto max-lg:max-h-[calc(95vh-80px)] max-sm:max-h-[calc(90vh-120px)] lg:max-h-[calc(90vh-120px)]">
+                            <div className="max-lg:mb-4 max-sm:mb-6 lg:mb-6 max-lg:p-3 max-sm:p-4 lg:p-4 bg-[#1a1a1a] rounded border border-gray-700">
+                                <div className="grid grid-cols-2 max-lg:grid-cols-2 lg:grid-cols-4 max-lg:gap-3 max-sm:gap-4 lg:gap-4 text-center justify-items-center">
                                     <div>
-                                        <div className="text-2xl font-bold text-white">{submitResults.score}</div>
-                                        <div className="text-sm text-gray-400">Score</div>
+                                        <div className="max-lg:text-xl max-sm:text-2xl lg:text-2xl font-bold text-white">{submitResults.score}</div>
+                                        <div className="max-lg:text-xs max-sm:text-sm lg:text-sm text-gray-400">Score</div>
                                     </div>
                                     <div>
-                                        <div className="text-2xl font-bold text-green-400">{submitResults.passedTests}</div>
-                                        <div className="text-sm text-gray-400">Passed</div>
+                                        <div className="max-lg:text-xl max-sm:text-2xl lg:text-2xl font-bold text-green-400">{submitResults.passedTests}</div>
+                                        <div className="max-lg:text-xs max-sm:text-sm lg:text-sm text-gray-400">Passed</div>
                                     </div>
                                     <div>
-                                        <div className="text-2xl font-bold text-red-400">{submitResults.totalTests - submitResults.passedTests}</div>
-                                        <div className="text-sm text-gray-400">Failed</div>
+                                        <div className="max-lg:text-xl max-sm:text-2xl lg:text-2xl font-bold text-red-400">{submitResults.totalTests - submitResults.passedTests}</div>
+                                        <div className="max-lg:text-xs max-sm:text-sm lg:text-sm text-gray-400">Failed</div>
                                     </div>
                                     <div>
-                                        <div className="text-2xl font-bold text-blue-400">{submitResults.totalTests}</div>
-                                        <div className="text-sm text-gray-400">Total</div>
+                                        <div className="max-lg:text-xl max-sm:text-2xl lg:text-2xl font-bold text-blue-400">{submitResults.totalTests}</div>
+                                        <div className="max-lg:text-xs max-sm:text-sm lg:text-sm text-gray-400">Total</div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-semibold text-white">Test Cases</h3>
+                            <div className="max-lg:space-y-3 max-sm:space-y-4 lg:space-y-4">
+                                <h3 className="max-lg:text-base max-sm:text-lg lg:text-lg font-semibold text-white">Test Cases</h3>
                                 {submitResults.results.map((result, index) => (
                                     <div key={index} className="bg-[#1a1a1a] rounded border border-gray-700 overflow-hidden">
-                                        <div className="p-3 bg-[#2a2a2a] flex justify-between items-center">
-                                            <span className="font-medium">Test Case {result.testCase}</span>
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-sm text-gray-400">{result.executionTime}ms</span>
+                                        <div className="max-lg:p-2 max-sm:p-3 lg:p-3 bg-[#2a2a2a] flex max-lg:flex-col max-sm:flex-row lg:flex-row max-lg:justify-start max-sm:justify-between lg:justify-between max-lg:items-start max-sm:items-center lg:items-center max-lg:gap-2 lg:gap-0">
+                                            <span className="font-medium max-lg:text-sm max-sm:text-base lg:text-base">Test Case {result.testCase}</span>
+                                            <div className="flex flex-wrap items-center max-lg:gap-2 max-sm:gap-3 lg:gap-3">
+                                                <span className="max-lg:text-xs max-sm:text-sm lg:text-sm text-gray-400">{result.executionTime}ms</span>
                                                 <span className={`px-2 py-1 rounded text-xs font-medium border ${getStatusColor(result.status)}`}>
                                                     {result.status.replace('_', ' ')}
                                                 </span>
@@ -1010,10 +1010,10 @@ int main(){
                                             </div>
                                         </div>
                                         {result.error && (
-                                            <div className="p-3 space-y-3">
+                                            <div className="max-lg:p-2 max-sm:p-3 lg:p-3 max-lg:space-y-2 max-sm:space-y-3 lg:space-y-3">
                                                 <div>
-                                                    <h5 className="text-sm font-medium text-red-400 mb-1">Error:</h5>
-                                                    <div className="bg-[#151515] p-2 rounded text-xs font-mono text-red-400 whitespace-pre-wrap">
+                                                    <h5 className="max-lg:text-xs max-sm:text-sm lg:text-sm font-medium text-red-400 mb-1">Error:</h5>
+                                                    <div className="bg-[#151515] p-2 rounded text-xs font-mono text-red-400 whitespace-pre-wrap overflow-x-auto">
                                                         {result.error}
                                                     </div>
                                                 </div>
