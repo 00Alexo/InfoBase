@@ -86,7 +86,7 @@ const createProblem = async (req, res) => {
             Teste,
             timeout,
             official: false,
-            accepted: false
+            accepted: true
         });
 
         await newProblem.save();

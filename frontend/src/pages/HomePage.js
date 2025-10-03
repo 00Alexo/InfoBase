@@ -35,6 +35,7 @@ import {
   FaLayerGroup,
 } from 'react-icons/fa';
 import NavBar from '../components/NavBar';
+import { useAuthContext } from '../Hooks/useAuthContext';
 
 const HomePage = ({ userInfo }) => {
   const location = useLocation();
@@ -388,7 +389,7 @@ const HomePage = ({ userInfo }) => {
                         Recent Activity
                     </h2>
                     <Button
-                        onClick={() => navigate('/profile/alex')}
+                        onClick={() => navigate(`/profile/${userInfo.username}`)}
                         size="sm"
                         variant="bordered"
                         className="border-gray-600 hover:border-red-500/50 text-gray-400 hover:text-white"
@@ -540,7 +541,7 @@ const HomePage = ({ userInfo }) => {
                         Achievements
                     </h2>
                     <Button
-                        onClick={() => navigate('/profile/alex')}
+                        onClick={() => navigate(`/profile/${userInfo.username}`)}
                         size="sm"
                         variant="bordered"
                         className="border-gray-600 hover:border-red-500/50 text-gray-400 hover:text-white"
@@ -606,7 +607,7 @@ const HomePage = ({ userInfo }) => {
                         View Contests
                     </Button>
                     <Button
-                        onClick={() => navigate('/profile/alex')}
+                        onClick={() => navigate(`/profile/${userInfo.username}`)}
                         variant="bordered"
                         className="w-full justify-start border-gray-600 hover:border-red-500/50 text-gray-300 hover:text-white"
                         startContent={<FaChartBar />}

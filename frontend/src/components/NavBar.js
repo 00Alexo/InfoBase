@@ -116,11 +116,6 @@ const NavBar = ({userInfo}) => {
         </Dropdown>
         </NavbarItem>
         <NavbarItem>
-          <p className="text-gray-300 hover:text-red-400 transition-colors duration-200 cursor-pointer font-medium">
-            Prizes
-          </p>
-        </NavbarItem>
-        <NavbarItem>
           <Dropdown>
             <NavbarItem>
               <DropdownTrigger>
