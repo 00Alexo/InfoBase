@@ -26,8 +26,8 @@ function AppContent() {
 
   return (
     <div className="App bg-[#18191c] min-h-screen">
-      {/* {location.pathname === '/' || location.pathname === '/welcome' ? null : <NavBar userInfo={profile}/>} */}
-      {/* <Routes> 
+      {location.pathname === '/' || location.pathname === '/welcome' ? null : <NavBar userInfo={profile}/>}
+      <Routes> 
         <Route path = "*" element={<NotFound/>}/>
         <Route path = "/" element={<WelcomePage userInfo={profile}/>}/>
         <Route path = "/welcome" element={<WelcomePage userInfo={profile}/>}/>
@@ -48,9 +48,9 @@ function AppContent() {
         <Route path = "/leaderboard" element={<LeaderBoard/>}/>
 
         <Route path = "/compiler" element={<Compiler/>}/>
-      </Routes> */}
-      This is the old demo link, due to some SOM bugs i cannot change the redirect so i m forced to give the new link here: 
-      <a href="http://34.40.84.205:3000" className="text-blue-300"> INFOBASE</a>
+      </Routes>
+      {/* This is the old demo link, due to some SOM bugs i cannot change the redirect so i m forced to give the new link here: 
+      <a href="http://34.40.84.205:3000" className="text-blue-300"> INFOBASE</a> */}
     </div>
   );
 }
