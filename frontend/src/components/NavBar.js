@@ -158,7 +158,7 @@ const NavBar = ({userInfo}) => {
                 <DropdownTrigger>
                   <Avatar
                       showFallback
-                      name = {user.username.charAt(0).toUpperCase()}
+                      name = {user?.username?.charAt(0).toUpperCase()}
                       as="button"
                       size="md"
                       className="transition-transform border-2 border-red-700 hover:border-red-500 rounded-full duration-300"
