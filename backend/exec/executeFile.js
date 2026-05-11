@@ -14,6 +14,9 @@ const DOCKER_RUNTIME_ARGS = [
     '--cap-drop', 'ALL'
 ];
 
+const USE_DOCKER_SANDBOX = process.env.CODE_RUNNER_USE_DOCKER === 'true';
+const LOCAL_PYTHON_COMMAND = process.env.PYTHON_BIN || 'python3';
+
 const toDockerPath = (dirPath) => path.resolve(dirPath).replace(/\\/g, '/');
 
 const normalizeDockerError = (message) => {
@@ -21,15 +24,27 @@ const normalizeDockerError = (message) => {
         return 'Docker execution failed.';
     }
 
-    const dockerDaemonDown = /docker: error during connect|cannot find the file specified|is the docker daemon running|no such file or directory.*docker_engine/i;
+    const dockerDaemonDown = /docker: error during connect|cannot find the file specified|is the docker daemon running|no such file or directory.*docker_engine|permission denied while trying to connect to the docker api/i;
     if (dockerDaemonDown.test(message)) {
-        return 'Docker daemon is not running or not reachable. Start Docker Desktop / dockerd and retry.';
+        return 'Docker sandbox is unavailable (daemon/socket permission). Set CODE_RUNNER_USE_DOCKER=false to use local gcc/python/java on the VM, or fix Docker daemon permissions.';
     }
 
     return message;
 };
 
 const createDockerProcess = (image, command, args, tempDir, interactive = false) => {
+    if (!USE_DOCKER_SANDBOX) {
+        const localCommand = command === 'python' ? LOCAL_PYTHON_COMMAND : command;
+        const adjustedArgs = command === 'java'
+            ? args.map((arg) => (arg === '/workspace' ? '.' : arg))
+            : args;
+
+        return spawn(localCommand, adjustedArgs, {
+            cwd: tempDir,
+            stdio: ['pipe', 'pipe', 'pipe']
+        });
+    }
+
     const dockerArgs = ['run'];
 
     if (interactive) {
@@ -50,6 +65,14 @@ const createDockerProcess = (image, command, args, tempDir, interactive = false)
     });
 };
 
+const renameJavaMainClass = (code, className) => {
+    if (/public\s+class\s+\w+/.test(code)) {
+        return code.replace(/public\s+class\s+\w+/, `public class ${className}`);
+    }
+
+    return code.replace(/class\s+\w+/, `class ${className}`);
+};
+
 const executeJava = async (code, sessionId, socket) => {
     const tempDir = path.join(__dirname, '../temp');
     const sourceFile = path.join(tempDir, `Main${sessionId}.java`); // Use Main + sessionId as filename
@@ -59,17 +82,14 @@ const executeJava = async (code, sessionId, socket) => {
         await fs.mkdir(tempDir, { recursive: true });
 
         const className = `Main${sessionId}`;
-        let modifiedCode = code;
-        
-        modifiedCode = modifiedCode.replace(/public\s+class\s+\w+/g, `public class ${className}`);
-        modifiedCode = modifiedCode.replace(/class\s+\w+/g, `class ${className}`);
+        const modifiedCode = renameJavaMainClass(code, className);
 
         await fs.writeFile(sourceFile, modifiedCode); 
 
         const compileProcess = createDockerProcess(
             'eclipse-temurin:21-jdk',
             'javac',
-            [path.basename(sourceFile)],
+            ['-encoding', 'UTF-8', path.basename(sourceFile)],
             tempDir
         );
 
@@ -500,9 +520,7 @@ const testJava = async (code, tests, timeLimit) => {
         try{
             await fs.mkdir(tempDir, { recursive: true });
             
-            let modifiedCode = code;
-            modifiedCode = modifiedCode.replace(/public\s+class\s+\w+/g, `public class ${className}`);
-            modifiedCode = modifiedCode.replace(/class\s+\w+/g, `class ${className}`);
+            const modifiedCode = renameJavaMainClass(code, className);
             
             await fs.writeFile(sourceFile, modifiedCode);
 
@@ -510,7 +528,7 @@ const testJava = async (code, tests, timeLimit) => {
                 const compileProcess = createDockerProcess(
                     'eclipse-temurin:21-jdk',
                     'javac',
-                    [path.basename(sourceFile)],
+                    ['-encoding', 'UTF-8', path.basename(sourceFile)],
                     tempDir
                 );
                 let compileError = '';
