@@ -1,8 +1,54 @@
-const { execSync, exec, spawn } = require("child_process");
+const { spawn } = require("child_process");
 const fs = require('fs').promises;
 const path = require('path');
 
 const activeProcesses = new Map(); // map pentru procesele active
+
+const DOCKER_RUNTIME_ARGS = [
+    '--rm',
+    '--network', 'none',
+    '--cpus', '1',
+    '--memory', '512m',
+    '--pids-limit', '64',
+    '--security-opt', 'no-new-privileges',
+    '--cap-drop', 'ALL'
+];
+
+const toDockerPath = (dirPath) => path.resolve(dirPath).replace(/\\/g, '/');
+
+const normalizeDockerError = (message) => {
+    if (!message) {
+        return 'Docker execution failed.';
+    }
+
+    const dockerDaemonDown = /docker: error during connect|cannot find the file specified|is the docker daemon running|no such file or directory.*docker_engine/i;
+    if (dockerDaemonDown.test(message)) {
+        return 'Docker daemon is not running or not reachable. Start Docker Desktop / dockerd and retry.';
+    }
+
+    return message;
+};
+
+const createDockerProcess = (image, command, args, tempDir, interactive = false) => {
+    const dockerArgs = ['run'];
+
+    if (interactive) {
+        dockerArgs.push('-i');
+    }
+
+    dockerArgs.push(
+        ...DOCKER_RUNTIME_ARGS,
+        '-v', `${toDockerPath(tempDir)}:/workspace`,
+        '-w', '/workspace',
+        image,
+        command,
+        ...args
+    );
+
+    return spawn('docker', dockerArgs, {
+        stdio: ['pipe', 'pipe', 'pipe']
+    });
+};
 
 const executeJava = async (code, sessionId, socket) => {
     const tempDir = path.join(__dirname, '../temp');
@@ -20,27 +66,44 @@ const executeJava = async (code, sessionId, socket) => {
 
         await fs.writeFile(sourceFile, modifiedCode); 
 
-        const compileProcess = spawn('javac', [sourceFile]);
+        const compileProcess = createDockerProcess(
+            'eclipse-temurin:21-jdk',
+            'javac',
+            [path.basename(sourceFile)],
+            tempDir
+        );
 
         let compileError = '';
         compileProcess.stderr.on('data', (data) => {
             compileError += data.toString();
         });
 
+        compileProcess.on('error', (error) => {
+            socket.emit('compilation-error', {
+                sessionId,
+                error: normalizeDockerError(error.message)
+            });
+            cleanup(sourceFile, classFile);
+        });
+
         compileProcess.on('close', (code) => {
             if(code !== 0){
                 socket.emit('compilation-error', {
                     sessionId,
-                    error: compileError || 'Java compilation failed'
+                    error: normalizeDockerError(compileError || 'Java compilation failed')
                 });
                 cleanup(sourceFile, classFile);
                 return;
             }
 
             // Rulam Java cu java -cp tempDir className
-            const runProcess = spawn('java', ['-cp', tempDir, className], {
-                stdio: ['pipe', 'pipe', 'pipe']
-            });
+            const runProcess = createDockerProcess(
+                'eclipse-temurin:21-jdk',
+                'java',
+                ['-cp', '/workspace', className],
+                tempDir,
+                true
+            );
 
             let programFinished = false; 
 
@@ -81,7 +144,7 @@ const executeJava = async (code, sessionId, socket) => {
             runProcess.stderr.on('data', (data) => {
                 socket.emit('program-error', {
                     sessionId,
-                    error: data.toString()
+                    error: normalizeDockerError(data.toString())
                 });
             });
 
@@ -107,7 +170,7 @@ const executeJava = async (code, sessionId, socket) => {
                     
                     socket.emit('program-error', {
                         sessionId,
-                        error: error.message
+                        error: normalizeDockerError(error.message)
                     });
                     
                     activeProcesses.delete(sessionId);
@@ -123,7 +186,7 @@ const executeJava = async (code, sessionId, socket) => {
     }catch(error){
         socket.emit('compilation-error', { 
             sessionId,
-            error: error.message
+            error: normalizeDockerError(error.message)
         });
         cleanup(sourceFile, classFile);
     }
@@ -139,26 +202,43 @@ const executeCpp = async (code, sessionId, socket) => {
 
         await fs.writeFile(sourceFile, code); //scriem codu in fisier
 
-        const compileProcess = spawn('g++', [sourceFile, '-o', executableFile, '-std=c++17']); // compilam codu si salvam procesu
+        const compileProcess = createDockerProcess(
+            'gcc:14',
+            'g++',
+            [path.basename(sourceFile), '-o', path.basename(executableFile), '-std=c++17'],
+            tempDir
+        ); // compilam codu si salvam procesu
 
         let compileError = '';
         compileProcess.stderr.on('data', (data) => {
             compileError += data.toString();
         }); // prindem eroarea de compilare in cazul in care exista
 
+        compileProcess.on('error', (error) => {
+            socket.emit('compilation-error', { // emit la client eroarea de compilare
+                sessionId,
+                error: normalizeDockerError(error.message)
+            });
+            cleanup(sourceFile, executableFile);
+        });
+
         compileProcess.on('close', (code) => {
             if(code !== 0){
                 socket.emit('compilation-error', { // emit la client eroarea de compilare
                     sessionId,
-                    error: compileError || 'Compilation failed'
+                    error: normalizeDockerError(compileError || 'Compilation failed')
                 });
                 cleanup(sourceFile, executableFile);
                 return; // iesim daca a fost eroare la compilare
             }
 
-            const runProcess = spawn(executableFile, [], {
-                stdio: ['pipe', 'pipe', 'pipe']
-            }); // rulam codu compilat
+            const runProcess = createDockerProcess(
+                'gcc:14',
+                `./${path.basename(executableFile)}`,
+                [],
+                tempDir,
+                true
+            ); // rulam codu compilat
 
             let programFinished = false; // flag pentru a urmari daca programu s-a terminat
 
@@ -198,9 +278,9 @@ const executeCpp = async (code, sessionId, socket) => {
             }); // prindem outputu normal si il trimitem pe frontend
 
             runProcess.stderr.on('data', (data) => {
-                socket.emit('program-error', { // emit la client eroarea de runtime
+                    socket.emit('program-error', { // emit la client eroarea de runtime
                     sessionId,
-                    error: data.toString()
+                        error: normalizeDockerError(data.toString())
                 });
             });
 
@@ -226,7 +306,7 @@ const executeCpp = async (code, sessionId, socket) => {
                     
                     socket.emit('program-error', { // emit la client eroarea de runtime
                         sessionId,
-                        error: error.message
+                        error: normalizeDockerError(error.message)
                     });
                     
                     activeProcesses.delete(sessionId); // scoatem procesu din lista de active
@@ -243,7 +323,7 @@ const executeCpp = async (code, sessionId, socket) => {
     } catch (error) {
         socket.emit('compilation-error', { // emit la client eroarea de compilare
             sessionId,
-            error: error.message
+            error: normalizeDockerError(error.message)
         });
         cleanup(sourceFile, executableFile); // stergem fisierele temporare
     }
@@ -266,11 +346,23 @@ const testCpp = async (code, tests, timeLimit) => {
             await fs.writeFile(sourceFile, code);
 
             const compileResult = await new Promise((resolve) =>{
-                const compileProcess = spawn('g++', [sourceFile, '-o', executableFile, '-std=c++17']);
+                const compileProcess = createDockerProcess(
+                    'gcc:14',
+                    'g++',
+                    [path.basename(sourceFile), '-o', path.basename(executableFile), '-std=c++17'],
+                    tempDir
+                );
                 let compileError = '';
 
                 compileProcess.stderr.on('data', (data) => {
                     compileError += data.toString();
+                });
+
+                compileProcess.on('error', (error) => {
+                    resolve({
+                        success: false,
+                        error: normalizeDockerError(error.message)
+                    });
                 });
 
                 compileProcess.on('close', (code) => {
@@ -294,9 +386,13 @@ const testCpp = async (code, tests, timeLimit) => {
 
             const startTime = Date.now();
             const executionResult = await new Promise((resolve) =>{
-                const runProcess = spawn(executableFile, [], {
-                    stdio: ['pipe', 'pipe', 'pipe']
-                });
+                const runProcess = createDockerProcess(
+                    'gcc:14',
+                    `./${path.basename(executableFile)}`,
+                    [],
+                    tempDir,
+                    true
+                );
 
                 let output = '';
                 let error = '';
@@ -319,7 +415,7 @@ const testCpp = async (code, tests, timeLimit) => {
                 })
 
                 runProcess.stderr.on('data', (data) =>{
-                    error += data.toString();
+                    error += normalizeDockerError(data.toString());
                 })
 
                 runProcess.on('close', (code) =>{
@@ -338,7 +434,7 @@ const testCpp = async (code, tests, timeLimit) => {
                     clearTimeout(timeout);
                     resolve({
                         output: output,
-                        error: err.message,
+                        error: normalizeDockerError(err.message),
                         exitCode: -1,
                         timeout: false
                     });
@@ -379,7 +475,7 @@ const testCpp = async (code, tests, timeLimit) => {
             results.push({
                 testCase: i + 1,
                 status: 'SYSTEM_ERROR',
-                error: error.message,
+                error: normalizeDockerError(error.message),
                 executionTime: 0
             });
             cleanup(sourceFile, executableFile);
@@ -411,17 +507,29 @@ const testJava = async (code, tests, timeLimit) => {
             await fs.writeFile(sourceFile, modifiedCode);
 
             const compileResult = await new Promise((resolve) =>{
-                const compileProcess = spawn('javac', [sourceFile]);
+                const compileProcess = createDockerProcess(
+                    'eclipse-temurin:21-jdk',
+                    'javac',
+                    [path.basename(sourceFile)],
+                    tempDir
+                );
                 let compileError = '';
 
                 compileProcess.stderr.on('data', (data) => {
                     compileError += data.toString();
                 });
 
+                compileProcess.on('error', (error) => {
+                    resolve({
+                        success: false,
+                        error: normalizeDockerError(error.message)
+                    });
+                });
+
                 compileProcess.on('close', (code) => {
                     resolve({
                         success: code === 0,
-                        error: compileError
+                        error: normalizeDockerError(compileError)
                     });
                 });
             });
@@ -440,9 +548,13 @@ const testJava = async (code, tests, timeLimit) => {
             const startTime = Date.now();
             const executionResult = await new Promise((resolve) =>{
                 // Rulăm Java cu java -cp tempDir className
-                const runProcess = spawn('java', ['-cp', tempDir, className], {
-                    stdio: ['pipe', 'pipe', 'pipe']
-                });
+                const runProcess = createDockerProcess(
+                    'eclipse-temurin:21-jdk',
+                    'java',
+                    ['-cp', '/workspace', className],
+                    tempDir,
+                    true
+                );
 
                 let output = '';
                 let error = '';
@@ -465,7 +577,7 @@ const testJava = async (code, tests, timeLimit) => {
                 })
 
                 runProcess.stderr.on('data', (data) =>{
-                    error += data.toString();
+                    error += normalizeDockerError(data.toString());
                 })
 
                 runProcess.on('close', (code) =>{
@@ -484,7 +596,7 @@ const testJava = async (code, tests, timeLimit) => {
                     clearTimeout(timeout);
                     resolve({
                         output: output,
-                        error: err.message,
+                        error: normalizeDockerError(err.message),
                         exitCode: -1,
                         timeout: false
                     });
@@ -525,7 +637,7 @@ const testJava = async (code, tests, timeLimit) => {
             results.push({
                 testCase: i + 1,
                 status: 'SYSTEM_ERROR',
-                error: error.message,
+                error: normalizeDockerError(error.message),
                 executionTime: 0
             });
             cleanup(sourceFile, classFile);
@@ -544,9 +656,13 @@ const executePython = async (code, sessionId, socket) => {
 
         await fs.writeFile(sourceFile, code);
 
-        const runProcess = spawn('python', [sourceFile], {
-            stdio: ['pipe', 'pipe', 'pipe']
-        })
+        const runProcess = createDockerProcess(
+            'python:3.12-slim',
+            'python',
+            ['-u', path.basename(sourceFile)],
+            tempDir,
+            true
+        )
 
         let programFinished = false;
 
@@ -586,7 +702,7 @@ const executePython = async (code, sessionId, socket) => {
         runProcess.stderr.on('data', (data) => {
             socket.emit('program-error', {
                 sessionId,
-                error: data.toString()
+                error: normalizeDockerError(data.toString())
             });
         });
 
@@ -612,7 +728,7 @@ const executePython = async (code, sessionId, socket) => {
                 
                 socket.emit('program-error', { 
                     sessionId,
-                    error: error.message
+                    error: normalizeDockerError(error.message)
                 });
                 
                 activeProcesses.delete(sessionId);
@@ -627,7 +743,7 @@ const executePython = async (code, sessionId, socket) => {
     }catch(error){
         socket.emit('compilation-error', { 
             sessionId,
-            error: error.message
+            error: normalizeDockerError(error.message)
         });
         cleanup(sourceFile, null); 
  
@@ -650,9 +766,13 @@ const testPython = async (code, tests, timeLimit) => {
 
             const startTime = Date.now();
             const executionResult = await new Promise((resolve) => {
-                const runProcess = spawn('python', [sourceFile], {
-                    stdio: ['pipe', 'pipe', 'pipe']
-                });
+                const runProcess = createDockerProcess(
+                    'python:3.12-slim',
+                    'python',
+                    ['-u', path.basename(sourceFile)],
+                    tempDir,
+                    true
+                );
 
                 let output = '';
                 let error = '';
@@ -675,7 +795,7 @@ const testPython = async (code, tests, timeLimit) => {
                 });
 
                 runProcess.stderr.on('data', (data) => {
-                    error += data.toString();
+                    error += normalizeDockerError(data.toString());
                 });
 
                 runProcess.on('close', (code) => {
@@ -694,7 +814,7 @@ const testPython = async (code, tests, timeLimit) => {
                     clearTimeout(timeout);
                     resolve({
                         output: output,
-                        error: err.message,
+                        error: normalizeDockerError(err.message),
                         exitCode: -1,
                         timeout: false
                     });
@@ -733,7 +853,7 @@ const testPython = async (code, tests, timeLimit) => {
             results.push({
                 testCase: i + 1,
                 status: 'SYSTEM_ERROR',
-                error: error.message,
+                error: normalizeDockerError(error.message),
                 executionTime: 0
             });
             cleanup(sourceFile, null);
